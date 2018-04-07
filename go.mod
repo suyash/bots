@@ -1,0 +1,1 @@
+module "suy.io/bots"

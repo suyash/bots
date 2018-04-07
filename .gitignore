@@ -1,0 +1,15 @@
+_*
+.env
+!sample.env
+tmp
+
+gin-bin
+debug
+debug.test
+
+vendor
+Gopkg.lock
+
+*.prof
+*.png
+*.svg
