@@ -3,5 +3,6 @@ go:
   - 1.9.x
   - 1.10.x
   - tip
+go_import_path: suy.io/bots
 script:
   - go test -race ./...
