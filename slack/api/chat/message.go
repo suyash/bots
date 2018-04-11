@@ -1,5 +1,9 @@
 package chat // import "suy.io/bots/slack/api/chat"
 
+import (
+	"suy.io/bots/slack/api/rtm"
+)
+
 type Message struct {
 	Channel        string        `json:"channel,omitempty" url:"channel,omitempty"`
 	Text           string        `json:"text,omitempty" url:"text,omitempty"`
@@ -18,6 +22,16 @@ type Message struct {
 
 func TextMessage(text string) *Message {
 	return &Message{Text: text}
+}
+
+func RTMMessage(msg *Message) *rtm.Message {
+	return &rtm.Message{
+		Channel:  msg.Channel,
+		Text:     msg.Text,
+		ThreadTs: msg.ThreadTs,
+		Ts:       msg.Ts,
+		User:     msg.Username,
+	}
 }
 
 type Attachment struct {
