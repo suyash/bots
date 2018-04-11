@@ -86,43 +86,14 @@ password.On("numbers", func(msg *chat.Message, controls *slack.Controls) {
 })
 
 password.On("characters", func(msg *chat.Message, controls *slack.Controls) {
-	characters := true
-
-	if lt := strings.ToLower(msg.Text); lt == "no" || lt == "nope" {
-		controls.Bot().Reply(chat.RTMMessage(msg), chat.TextMessage("Not Using Special Characters"))
-		characters = false
-	} else {
-		controls.Bot().Reply(chat.RTMMessage(msg), chat.TextMessage("Using Special Characters"))
-	}
-
-	l, err := controls.Get("length")
-	if err != nil {
-		controls.Bot().Reply(chat.RTMMessage(msg), chat.TextMessage("Internal Error"))
-		log.Fatal(errors.Wrap(err, "Did not get length from conversation state"))
-	}
-
-	length, _ := strconv.ParseInt(l, 10, 64)
-
-	numbers := true
-
-	n, err := controls.Get("numbers")
-	if err != nil {
-		controls.Bot().Reply(chat.RTMMessage(msg), chat.TextMessage("Internal Error"))
-		log.Fatal(errors.Wrap(err, "Did not get numbers from conversation state"))
-	}
-
-	if n == "false" {
-		numbers = false
-	}
-
-	ans := generate(length, numbers, characters)
+	...
 
 	controls.Bot().Reply(chat.RTMMessage(msg), chat.TextMessage("Your Password is '"+ans+"'"))
 	controls.End()
 })
 ```
 
-### build
+## build
 
 The project uses [ffjson](https://github.com/pquerna/ffjson) to optimize JSON encoding/decoding.
 
