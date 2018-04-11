@@ -1,13 +1,7 @@
 package slack
 
 import (
-	"github.com/pkg/errors"
-
 	"suy.io/bots/slack/api/chat"
-)
-
-var (
-	ErrStateAlreadyExists = errors.New("State Already Defined")
 )
 
 // ffjson: skip

@@ -19,20 +19,6 @@ import (
 	"suy.io/bots/slack/api/team"
 )
 
-var (
-	ErrInvalidClientID            = errors.New("Invalid Client ID")
-	ErrInvalidClientSecret        = errors.New("Invalid Client Secret")
-	ErrInvalidVerification        = errors.New("Invalid Verification Token")
-	ErrInvalidConnector           = errors.New("Invalid Connector")
-	ErrInvalidBotStorage          = errors.New("Invalid Bot Storage")
-	ErrInvalidConversationStorage = errors.New("Invalid Conversation Storage")
-
-	ErrConversationExists        = errors.New("Conversation Already Exists")
-	ErrConversationNotFound      = errors.New("Conversation Not Found")
-	ErrConversationAlreadyActive = errors.New("Conversation Already Active")
-	ErrNoStartState              = errors.New("Conversation Has no start state")
-)
-
 // ffjson: skip
 type Controller struct {
 	oauthConf    *oauth2.Config

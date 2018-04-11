@@ -15,11 +15,6 @@ import (
 
 const InteractionImmediateResponseTimeout = 2000 * time.Millisecond
 
-var (
-	ErrExceededResponseInteraction = errors.New("Can only respond upto 5 times for an interaction")
-	ErrEmptyResponseURLInteraction = errors.New("Empty Response URL")
-)
-
 // ffjson: skip
 type Interaction struct {
 	responded         int8

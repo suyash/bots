@@ -1,13 +1,5 @@
 package slack
 
-import "github.com/pkg/errors"
-
-var (
-	ErrBotNotFound     = errors.New("Bot Not Found")
-	ErrBotAlreadyAdded = errors.New("Bot Already Added")
-	ErrItemNotFound    = errors.New("Item Not Found")
-)
-
 type BotStore interface {
 	AddBot(*OAuthPayload) error
 	GetBot(string) (*OAuthPayload, error)

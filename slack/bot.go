@@ -7,11 +7,6 @@ import (
 	"suy.io/bots/slack/api/rtm"
 )
 
-var (
-	ErrInvalidMessage = errors.New("invalid message")
-	ErrChannelUnset   = errors.New("channel is not set")
-)
-
 // ffjson: skip
 type Bot struct {
 	id     string

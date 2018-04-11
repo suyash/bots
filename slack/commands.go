@@ -16,8 +16,6 @@ import (
 
 const CommandImmediateResponseTimeout = 2000 * time.Millisecond
 
-var ErrExceededResponseCommand = errors.New("Can only respond upto 5 times for a command")
-
 // ffjson: skip
 type Command struct {
 	immediateResponse chan []byte
