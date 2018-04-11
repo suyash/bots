@@ -11,7 +11,6 @@ import (
 
 type RedisBotStore struct {
 	client *redis.Client
-	ms     *slack.MemoryBotStore
 }
 
 func NewRedisBotStore(host string) *RedisBotStore {
@@ -21,13 +20,11 @@ func NewRedisBotStore(host string) *RedisBotStore {
 		DB:       0,
 	})
 
-	ms := slack.NewMemoryBotStore()
-
 	if _, err := c.Ping().Result(); err != nil {
 		log.Fatal(err)
 	}
 
-	return &RedisBotStore{c, ms}
+	return &RedisBotStore{c}
 }
 
 func (bs *RedisBotStore) AddBot(p *slack.OAuthPayload) error {
@@ -42,18 +39,10 @@ func (bs *RedisBotStore) AddBot(p *slack.OAuthPayload) error {
 		return err
 	}
 
-	if err := bs.ms.AddBot(p); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (bs *RedisBotStore) GetBot(team string) (*slack.OAuthPayload, error) {
-	if p, err := bs.ms.GetBot(team); err == nil {
-		return p, nil
-	}
-
 	log.Println("Getting Bot For team", team)
 
 	d, err := bs.client.Get(team).Result()
@@ -69,19 +58,11 @@ func (bs *RedisBotStore) GetBot(team string) (*slack.OAuthPayload, error) {
 		return nil, err
 	}
 
-	if err := bs.ms.AddBot(p); err != nil {
-		return nil, err
-	}
-
 	return p, nil
 }
 
 func (bs *RedisBotStore) RemoveBot(team string) error {
 	log.Println("Removing Bot For team", team)
-
-	if err := bs.ms.RemoveBot(team); err != nil {
-		return err
-	}
 
 	if err := bs.client.Del(team).Err(); err != nil {
 		return err
