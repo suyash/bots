@@ -1,8 +1,12 @@
 language: go
+sudo: false
 go:
   - 1.9.x
   - 1.10.x
   - tip
 go_import_path: suy.io/bots
+before_install:
+  - go get github.com/mattn/goveralls
 script:
   - go test -v -race ./...
+  - $GOPATH/bin/goveralls -service=travis-ci
