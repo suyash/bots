@@ -1,5 +1,3 @@
-> Happy chatbot developers are all alike; every unhappy chatbot developer is unhappy in his own way.
-
 # bots
 
 [![GoDoc](https://godoc.org/suy.io/bots?status.svg)](https://godoc.org/suy.io/bots) [![Build Status](https://travis-ci.org/suyash/bots.svg?branch=master)](https://travis-ci.org/suyash/bots)
@@ -92,6 +90,28 @@ password.On("characters", func(msg *chat.Message, controls *slack.Controls) {
 	controls.End()
 })
 ```
+
+### Connector
+
+A connector is a websocket connection pool defined at https://godoc.org/suy.io/bots/slack#Connector. The connector package provides a type that can manage connections. By default all connections are also a part of the same service, but if required, can be abstracted out and the two services can talk using any transport mechanism. Sample HTTP implementations are by [httpserver](https://godoc.org/suy.io/bots/slack/connector/contrib/httpserver) and [httpclient](https://godoc.org/suy.io/bots/slack/contrib/connector/httpclient) respectively.
+
+### Storage
+
+There are 3 main storage interfaces
+
+- [BotStore](https://godoc.org/suy.io/bots/slack#BotStore)
+
+  This essentially stores `OAuthPayload`s of all bots that have been authenticated with the service. A custom implementation can be provided by passing it inside `WithBotStore` function when initializing a controller. An example [redis implementation](https://godoc.org/suy.io/bots/slack/contrib/redis#RedisBotStore).
+
+- [ConversationStore](https://godoc.org/suy.io/bots/slack#ConversationStore)
+
+  This stores and manages conversation data and state. A custom implementation can be provided at initialization by using `WithConversationStore` when initializing a controller. An example [redis implementation](https://godoc.org/suy.io/bots/slack/contrib/redis#RedisConversationStore).
+
+### Issues
+
+- [ ] `*websocket.Conn` does not `Close()` and throws an error.
+
+- [ ] ffjson not generating fflib import for interactions
 
 ## build
 
