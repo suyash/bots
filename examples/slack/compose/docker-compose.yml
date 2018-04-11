@@ -1,0 +1,18 @@
+version: '2.1'
+
+services:
+  bot:
+    image: bot
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - connector
+      - redis
+    env_file: .env
+  connector:
+    image: connector
+    build: ./connector
+    env_file: ./connector/.env
+  redis:
+    image: redis:alpine

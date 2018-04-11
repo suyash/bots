@@ -93,7 +93,7 @@ password.On("characters", func(msg *chat.Message, controls *slack.Controls) {
 
 ### Connector
 
-A connector is a websocket connection pool defined at https://godoc.org/suy.io/bots/slack#Connector. The connector package provides a type that can manage connections. By default all connections are also a part of the same service, but if required, can be abstracted out and the two services can talk using any transport mechanism. Sample HTTP implementations are by [httpserver](https://godoc.org/suy.io/bots/slack/connector/contrib/httpserver) and [httpclient](https://godoc.org/suy.io/bots/slack/contrib/connector/httpclient) respectively.
+A connector is a websocket connection pool defined at https://godoc.org/suy.io/bots/slack#Connector. The connector package provides a type that can manage connections. By default all connections are also a part of the same service, but if required, can be abstracted out and the two services can talk using any transport mechanism. Sample HTTP implementations are by [httpserver](https://godoc.org/suy.io/bots/slack/connector/contrib/httpserver) and [httpclient](https://godoc.org/suy.io/bots/slack/contrib/connector/httpclient) respectively. There is also [an example](examples/slack/compose).
 
 ### Storage
 

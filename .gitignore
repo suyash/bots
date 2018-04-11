@@ -1,6 +1,6 @@
 _*
 .env
-!sample.env
+!**/sample.env
 tmp
 
 gin-bin
