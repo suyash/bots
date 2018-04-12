@@ -113,6 +113,8 @@ There are 3 main storage interfaces
 
 - [ ] ffjson not generating fflib import for interactions
 
+- [ ] does not work on appengine, [because of using http.DefaultClient](https://github.com/suyash/bots/blob/master/slack/api/request.go#L63). Figure out a way to switch out the client.
+
 ## build
 
 The project uses [ffjson](https://github.com/pquerna/ffjson) to optimize JSON encoding/decoding.
