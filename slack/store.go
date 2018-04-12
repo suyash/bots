@@ -1,33 +1,35 @@
 package slack
 
+import "suy.io/bots/slack/api/oauth"
+
 type BotStore interface {
-	AddBot(*OAuthPayload) error
-	GetBot(string) (*OAuthPayload, error)
+	AddBot(*oauth.AccessResponse) error
+	GetBot(string) (*oauth.AccessResponse, error)
 	RemoveBot(string) error
-	AllBots() ([]*OAuthPayload, error)
+	AllBots() ([]*oauth.AccessResponse, error)
 }
 
 // ffjson: skip
 type MemoryBotStore struct {
-	bots map[string]*OAuthPayload
+	bots map[string]*oauth.AccessResponse
 }
 
 func NewMemoryBotStore() *MemoryBotStore {
 	return &MemoryBotStore{
-		bots: make(map[string]*OAuthPayload),
+		bots: make(map[string]*oauth.AccessResponse),
 	}
 }
 
-func (bs *MemoryBotStore) AddBot(p *OAuthPayload) error {
-	if _, ok := bs.bots[p.Team]; ok {
+func (bs *MemoryBotStore) AddBot(p *oauth.AccessResponse) error {
+	if _, ok := bs.bots[p.TeamID]; ok {
 		return ErrBotAlreadyAdded
 	}
 
-	bs.bots[p.Team] = p
+	bs.bots[p.TeamID] = p
 	return nil
 }
 
-func (bs *MemoryBotStore) GetBot(team string) (*OAuthPayload, error) {
+func (bs *MemoryBotStore) GetBot(team string) (*oauth.AccessResponse, error) {
 	b, ok := bs.bots[team]
 	if !ok {
 		return nil, ErrBotNotFound
@@ -45,8 +47,8 @@ func (bs *MemoryBotStore) RemoveBot(team string) error {
 	return nil
 }
 
-func (bs *MemoryBotStore) AllBots() ([]*OAuthPayload, error) {
-	bots := make([]*OAuthPayload, 0, len(bs.bots))
+func (bs *MemoryBotStore) AllBots() ([]*oauth.AccessResponse, error) {
+	bots := make([]*oauth.AccessResponse, 0, len(bs.bots))
 	for _, b := range bs.bots {
 		bots = append(bots, b)
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 
 	"suy.io/bots/slack/api/chat"
+	"suy.io/bots/slack/api/oauth"
 	"suy.io/bots/slack/api/rtm"
 )
 
@@ -18,11 +19,11 @@ type Bot struct {
 	cs    ConversationStore
 }
 
-func newBot(p *OAuthPayload, c Connector, convs map[string]*Conversation, cs ConversationStore) *Bot {
+func newBot(p *oauth.AccessResponse, c Connector, convs map[string]*Conversation, cs ConversationStore) *Bot {
 	return &Bot{
-		teamID: p.Team,
-		token:  p.Bot.Token,
-		id:     p.Bot.User,
+		teamID: p.TeamID,
+		token:  p.Bot.BotAccessToken,
+		id:     p.Bot.BotUserID,
 		c:      c,
 		convs:  convs,
 		cs:     cs,

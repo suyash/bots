@@ -1,7 +1,6 @@
 package slack
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,17 +10,17 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2"
-	oauth2Slack "golang.org/x/oauth2/slack"
 
 	"suy.io/bots/slack/api/chat"
+	"suy.io/bots/slack/api/oauth"
 	"suy.io/bots/slack/api/rtm"
 	"suy.io/bots/slack/api/team"
 )
 
 // ffjson: skip
 type Controller struct {
-	oauthConf    *oauth2.Config
+	clientID     string
+	clientSecret string
 	verification string
 
 	connector     Connector
@@ -47,8 +46,6 @@ type Controller struct {
 
 func NewController(options ...func(*Controller) error) (*Controller, error) {
 	controller := &Controller{
-		oauthConf: &oauth2.Config{Endpoint: oauth2Slack.Endpoint},
-
 		conversations: NewConversationRegistry(),
 		botAdded:      make(chan *Bot),
 
@@ -109,7 +106,7 @@ func WithClientID(id string) func(*Controller) error {
 			return ErrInvalidClientID
 		}
 
-		c.oauthConf.ClientID = id
+		c.clientID = id
 		return nil
 	}
 }
@@ -120,7 +117,7 @@ func WithClientSecret(secret string) func(*Controller) error {
 			return ErrInvalidClientSecret
 		}
 
-		c.oauthConf.ClientSecret = secret
+		c.clientSecret = secret
 		return nil
 	}
 }
@@ -176,10 +173,13 @@ func (c *Controller) listen() {
 }
 
 func (c *Controller) CreateAddToSlackURL(scopes []string, redirect, state string) (string, error) {
-	c.oauthConf.RedirectURL = redirect
-	c.oauthConf.Scopes = scopes
-	ans := c.oauthConf.AuthCodeURL(state)
-	return ans, nil
+	v := make(url.Values)
+	v.Add("client_id", c.clientID)
+	v.Add("scope", strings.Join(scopes, ","))
+	v.Add("redirect_uri", redirect)
+	v.Add("state", state)
+
+	return "https://slack.com/oauth/authorize?" + v.Encode(), nil
 }
 
 func (c *Controller) CreateAddToSlackButton(scopes []string, redirect, state string) (string, error) {
@@ -191,37 +191,7 @@ func (c *Controller) CreateAddToSlackButton(scopes []string, redirect, state str
 	return `<a href="` + url + `"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`, nil
 }
 
-// ffjson: nodecoder
-type OAuthPayloadBot struct {
-	Token string `json:"token,omitempty"`
-	User  string `json:"user,omitempty"`
-}
-
-// ffjson: nodecoder
-type OAuthPayload struct {
-	Token string           `json:"token,omitempty"`
-	Team  string           `json:"team,omitempty"`
-	Bot   *OAuthPayloadBot `json:"bot,omitempty"`
-}
-
-func (c *Controller) ExchangeCode(code string) (*OAuthPayload, error) {
-	tok, err := c.oauthConf.Exchange(context.Background(), code)
-	if err != nil {
-		return nil, errors.Wrap(err, "ExchangeCode Failed")
-	}
-
-	ans := &OAuthPayload{Bot: &OAuthPayloadBot{}}
-	ans.Token = tok.AccessToken
-	ans.Team = tok.Extra("team_id").(string)
-
-	if bm := tok.Extra("bot"); bm != nil {
-		ans.Bot.Token, ans.Bot.User = bm.(map[string]interface{})["bot_access_token"].(string), bm.(map[string]interface{})["bot_user_id"].(string)
-	}
-
-	return ans, nil
-}
-
-func (c *Controller) OAuthHandler(redirect, expectedState string, onSuccess func(*OAuthPayload, http.ResponseWriter, *http.Request)) http.HandlerFunc {
+func (c *Controller) OAuthHandler(redirect, expectedState string, onSuccess func(*oauth.AccessResponse, http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		code := req.URL.Query().Get("code")
 		currentState := req.URL.Query().Get("state")
@@ -231,9 +201,9 @@ func (c *Controller) OAuthHandler(redirect, expectedState string, onSuccess func
 			return
 		}
 
-		payload, err := c.ExchangeCode(code)
+		payload, err := oauth.Access(&oauth.AccessRequest{c.clientID, c.clientSecret, code, redirect})
 		if err != nil {
-			http.Error(res, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -260,7 +230,7 @@ func (c *Controller) CreateBot(token string) (*Bot, error) {
 	}
 
 	teamID := info.Team.ID
-	payload := &OAuthPayload{Team: teamID, Bot: &OAuthPayloadBot{Token: token}}
+	payload := &oauth.AccessResponse{TeamID: teamID, Bot: &oauth.Bot{BotAccessToken: token}}
 	if err := c.bots.AddBot(payload); err != nil {
 		return nil, errors.Wrap(err, "CreateBot Failed")
 	}
@@ -404,7 +374,7 @@ func (c *Controller) InteractionHandler() http.HandlerFunc {
 			return
 		}
 
-		iact.immediateResponse, iact.token = make(chan []byte), payload.Token
+		iact.immediateResponse, iact.token = make(chan []byte), payload.AccessToken
 		b := newBot(payload, c.connector, c.conversations, c.cs)
 		go func() { c.interactions <- &InteractionPair{iact.Interaction, b} }()
 

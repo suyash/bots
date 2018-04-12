@@ -8,6 +8,5 @@ require (
 	"github.com/pkg/errors" v0.8.0
 	"github.com/pquerna/ffjson" v0.0.0-20171002144729-d49c2bc1aa13
 	"golang.org/x/net" v0.0.0-20180406214816-61147c48b25b
-	"golang.org/x/oauth2" v0.0.0-20180402223937-921ae394b943
 	"gopkg.in/bufio.v1" v0.0.0-20140618132640-567b2bfa514e
 )

@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis"
 
 	"suy.io/bots/slack"
+	"suy.io/bots/slack/api/oauth"
 )
 
 type RedisBotStore struct {
@@ -27,22 +28,22 @@ func NewRedisBotStore(host string) *RedisBotStore {
 	return &RedisBotStore{c}
 }
 
-func (bs *RedisBotStore) AddBot(p *slack.OAuthPayload) error {
-	log.Println("Adding Bot For team", p.Team)
+func (bs *RedisBotStore) AddBot(p *oauth.AccessResponse) error {
+	log.Println("Adding Bot For team", p.TeamID)
 
 	d, err := json.Marshal(p)
 	if err != nil {
 		return err
 	}
 
-	if err := bs.client.Set(p.Team, d, 0).Err(); err != nil {
+	if err := bs.client.Set(p.TeamID, d, 0).Err(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (bs *RedisBotStore) GetBot(team string) (*slack.OAuthPayload, error) {
+func (bs *RedisBotStore) GetBot(team string) (*oauth.AccessResponse, error) {
 	log.Println("Getting Bot For team", team)
 
 	d, err := bs.client.Get(team).Result()
@@ -50,8 +51,8 @@ func (bs *RedisBotStore) GetBot(team string) (*slack.OAuthPayload, error) {
 		return nil, err
 	}
 
-	p := &slack.OAuthPayload{
-		Bot: &slack.OAuthPayloadBot{},
+	p := &oauth.AccessResponse{
+		Bot: &oauth.Bot{},
 	}
 
 	if err := json.Unmarshal([]byte(d), p); err != nil {
@@ -71,7 +72,7 @@ func (bs *RedisBotStore) RemoveBot(team string) error {
 	return nil
 }
 
-func (bs *RedisBotStore) AllBots() ([]*slack.OAuthPayload, error) {
+func (bs *RedisBotStore) AllBots() ([]*oauth.AccessResponse, error) {
 	log.Println("Getting All Bots")
 
 	keys, err := bs.client.Keys("*").Result()
@@ -79,7 +80,7 @@ func (bs *RedisBotStore) AllBots() ([]*slack.OAuthPayload, error) {
 		return nil, err
 	}
 
-	bots := make([]*slack.OAuthPayload, 0, len(keys))
+	bots := make([]*oauth.AccessResponse, 0, len(keys))
 	for _, k := range keys {
 		p, err := bs.GetBot(k)
 		if err != nil {
