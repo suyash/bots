@@ -13,13 +13,14 @@ import (
 
 	"suy.io/bots/slack/api"
 	"suy.io/bots/slack/api/chat"
+	"suy.io/bots/slack/api/oauth"
 	"suy.io/bots/slack/api/rtm"
 	"suy.io/bots/slack/connector"
 )
 
 func Test_newBot(t *testing.T) {
 	type args struct {
-		p     *OAuthPayload
+		p     *oauth.AccessResponse
 		c     Connector
 		convs map[string]*Conversation
 		cs    ConversationStore
@@ -30,7 +31,7 @@ func Test_newBot(t *testing.T) {
 		args args
 		want *Bot
 	}{
-		{"", args{p: &OAuthPayload{Bot: &OAuthPayloadBot{}}}, &Bot{}},
+		{"", args{p: &oauth.AccessResponse{Bot: &oauth.Bot{}}}, &Bot{}},
 	}
 
 	for _, tt := range tests {

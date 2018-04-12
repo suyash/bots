@@ -10,11 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"golang.org/x/oauth2"
-	oauth2Slack "golang.org/x/oauth2/slack"
-
 	"suy.io/bots/slack/api"
 	"suy.io/bots/slack/api/chat"
+	"suy.io/bots/slack/api/oauth"
 	"suy.io/bots/slack/api/rtm"
 )
 
@@ -32,8 +30,6 @@ func TestNewController(t *testing.T) {
 		wantErr bool
 	}{
 		{"", args{[]func(*Controller) error{WithConnector(c)}}, &Controller{
-			oauthConf: &oauth2.Config{Endpoint: oauth2Slack.Endpoint},
-
 			conversations: make(map[string]*Conversation),
 			botAdded:      make(chan *Bot),
 
@@ -130,8 +126,8 @@ func TestWithClientID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WithClientID(tt.args.id)(c); (got != nil) != tt.wantErr || c.oauthConf.ClientID != tt.args.id {
-				t.Errorf("WithClientID() = %v, want %v", tt.args.id, c.oauthConf.ClientID)
+			if got := WithClientID(tt.args.id)(c); (got != nil) != tt.wantErr || c.clientID != tt.args.id {
+				t.Errorf("WithClientID() = %v, want %v", tt.args.id, c.clientID)
 			}
 		})
 	}
@@ -158,8 +154,8 @@ func TestWithClientSecret(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WithClientSecret(tt.args.secret)(c); (got != nil) != tt.wantErr || c.oauthConf.ClientSecret != tt.args.secret {
-				t.Errorf("WithClientSecret() = %v, want %v", c.oauthConf.ClientSecret, tt.args.secret)
+			if got := WithClientSecret(tt.args.secret)(c); (got != nil) != tt.wantErr || c.clientSecret != tt.args.secret {
+				t.Errorf("WithClientSecret() = %v, want %v", c.clientSecret, tt.args.secret)
 			}
 		})
 	}
@@ -298,108 +294,77 @@ func TestWithConversationStore(t *testing.T) {
 // 	}
 // }
 
-func TestController_CreateAddToSlackURL(t *testing.T) {
-	type args struct {
-		scopes   []string
-		redirect string
-		state    string
-	}
-
-	c, err := NewController(WithClientID("2222.2222"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	tests := []struct {
-		name    string
-		c       *Controller
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{"", c, args{[]string{"bot", "commands"}, "https://a.a", "test"}, "https://slack.com/oauth/authorize?client_id=2222.2222&redirect_uri=https%3A%2F%2Fa.a&response_type=code&scope=bot+commands&state=test", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.CreateAddToSlackURL(tt.args.scopes, tt.args.redirect, tt.args.state)
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Controller.CreateAddToSlackURL() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if got != tt.want {
-				t.Errorf("Controller.CreateAddToSlackURL() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestController_CreateAddToSlackButton(t *testing.T) {
-	type args struct {
-		scopes   []string
-		redirect string
-		state    string
-	}
-
-	c, err := NewController(WithClientID("2222.2222"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	tests := []struct {
-		name    string
-		c       *Controller
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{"", c, args{[]string{"bot", "commands"}, "https://a.a", "test"}, `<a href="https://slack.com/oauth/authorize?client_id=2222.2222&redirect_uri=https%3A%2F%2Fa.a&response_type=code&scope=bot+commands&state=test"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`, false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.CreateAddToSlackButton(tt.args.scopes, tt.args.redirect, tt.args.state)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Controller.CreateAddToSlackButton() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("Controller.CreateAddToSlackButton() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-// NOTE: need valid codes to exchange to test this
+// TODO: make these work for arbitrary order of query parameters
 //
-// Also, kinda already tested at https://github.com/golang/oauth2/blob/master/oauth2_test.go#L94
-//
-// func TestController_ExchangeCode(t *testing.T) {
+// func TestController_CreateAddToSlackURL(t *testing.T) {
 // 	type args struct {
-// 		code string
+// 		scopes   []string
+// 		redirect string
+// 		state    string
+// 	}
+
+// 	c, err := NewController(WithClientID("2222.2222"))
+// 	if err != nil {
+// 		t.Fatal(err)
 // 	}
 
 // 	tests := []struct {
 // 		name    string
 // 		c       *Controller
 // 		args    args
-// 		want    *OAuthPayload
+// 		want    string
 // 		wantErr bool
 // 	}{
-// 		// TODO: Add test cases.
+// 		{"", c, args{[]string{"bot", "commands"}, "https://a.a", "test"}, "https://slack.com/oauth/authorize?client_id=2222.2222&redirect_uri=https%3A%2F%2Fa.a&response_type=code&scope=bot+commands&state=test", false},
 // 	}
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			got, err := tt.c.ExchangeCode(tt.args.code)
+// 			got, err := tt.c.CreateAddToSlackURL(tt.args.scopes, tt.args.redirect, tt.args.state)
+
 // 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("Controller.ExchangeCode() error = %v, wantErr %v", err, tt.wantErr)
+// 				t.Errorf("Controller.CreateAddToSlackURL() error = %v, wantErr %v", err, tt.wantErr)
 // 				return
 // 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("Controller.ExchangeCode() = %v, want %v", got, tt.want)
+
+// 			if got != tt.want {
+// 				t.Errorf("Controller.CreateAddToSlackURL() = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
+
+// func TestController_CreateAddToSlackButton(t *testing.T) {
+// 	type args struct {
+// 		scopes   []string
+// 		redirect string
+// 		state    string
+// 	}
+
+// 	c, err := NewController(WithClientID("2222.2222"))
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// 	tests := []struct {
+// 		name    string
+// 		c       *Controller
+// 		args    args
+// 		want    string
+// 		wantErr bool
+// 	}{
+// 		{"", c, args{[]string{"bot", "commands"}, "https://a.a", "test"}, `<a href="https://slack.com/oauth/authorize?client_id=2222.2222&redirect_uri=https%3A%2F%2Fa.a&response_type=code&scope=bot+commands&state=test"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`, false},
+// 	}
+
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			got, err := tt.c.CreateAddToSlackButton(tt.args.scopes, tt.args.redirect, tt.args.state)
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("Controller.CreateAddToSlackButton() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+// 			if got != tt.want {
+// 				t.Errorf("Controller.CreateAddToSlackButton() = %v, want %v", got, tt.want)
 // 			}
 // 		})
 // 	}
@@ -426,25 +391,21 @@ func TestController_OAuthHandler(t *testing.T) {
 		}
 
 		res.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(res, `{"access_token": "90d64460d14870c08c81352a05dedd3465940a7c", "team_id": "T1234"}`)
+		fmt.Fprint(res, `{"ok":true,"access_token":"90d64460d14870c08c81352a05dedd3465940a7c","team_id":"T1234","bot":{"bot_access_token":"xoxb-bob-lob-law","bot_user_id":"U1234"}}`)
 	}))
+
+	api.SLACK_API_ROOT = s.URL
 
 	type args struct {
 		redirect      string
 		expectedState string
-		onSuccess     func(*OAuthPayload, http.ResponseWriter, *http.Request)
+		onSuccess     func(*oauth.AccessResponse, http.ResponseWriter, *http.Request)
 	}
 
 	c, err := NewController(
 		WithClientID("2222.2222"),
 		WithClientSecret("aaaaaaaa"),
 	)
-
-	c.oauthConf = &oauth2.Config{
-		Endpoint: oauth2.Endpoint{
-			TokenURL: s.URL,
-		},
-	}
 
 	if err != nil {
 		t.Fatal(err)

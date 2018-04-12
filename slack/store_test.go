@@ -3,6 +3,8 @@ package slack
 import (
 	"reflect"
 	"testing"
+
+	"suy.io/bots/slack/api/oauth"
 )
 
 func TestNewMemoryBotStore(t *testing.T) {
@@ -10,7 +12,7 @@ func TestNewMemoryBotStore(t *testing.T) {
 		name string
 		want *MemoryBotStore
 	}{
-		{"", &MemoryBotStore{make(map[string]*OAuthPayload)}},
+		{"", &MemoryBotStore{make(map[string]*oauth.AccessResponse)}},
 	}
 
 	for _, tt := range tests {
@@ -24,7 +26,7 @@ func TestNewMemoryBotStore(t *testing.T) {
 
 func TestMemoryBotStore_AddBot(t *testing.T) {
 	type args struct {
-		p *OAuthPayload
+		p *oauth.AccessResponse
 	}
 
 	bs := NewMemoryBotStore()
@@ -35,8 +37,8 @@ func TestMemoryBotStore_AddBot(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"", bs, args{&OAuthPayload{Team: "T1234567"}}, false},
-		{"", bs, args{&OAuthPayload{Team: "T1234567"}}, true},
+		{"", bs, args{&oauth.AccessResponse{TeamID: "T1234567"}}, false},
+		{"", bs, args{&oauth.AccessResponse{TeamID: "T1234567"}}, true},
 	}
 
 	for _, tt := range tests {
@@ -54,19 +56,19 @@ func TestMemoryBotStore_GetBot(t *testing.T) {
 	}
 
 	bs := NewMemoryBotStore()
-	bs.AddBot(&OAuthPayload{
-		Team: "T7654321",
+	bs.AddBot(&oauth.AccessResponse{
+		TeamID: "T7654321",
 	})
 
 	tests := []struct {
 		name    string
 		bs      *MemoryBotStore
 		args    args
-		want    *OAuthPayload
+		want    *oauth.AccessResponse
 		wantErr bool
 	}{
 		{"", bs, args{"T1234567"}, nil, true},
-		{"", bs, args{"T7654321"}, &OAuthPayload{Team: "T7654321"}, false},
+		{"", bs, args{"T7654321"}, &oauth.AccessResponse{TeamID: "T7654321"}, false},
 	}
 
 	for _, tt := range tests {
@@ -91,8 +93,8 @@ func TestMemoryBotStore_RemoveBot(t *testing.T) {
 	}
 
 	bs := NewMemoryBotStore()
-	bs.AddBot(&OAuthPayload{
-		Team: "T7654321",
+	bs.AddBot(&oauth.AccessResponse{
+		TeamID: "T7654321",
 	})
 
 	tests := []struct {
@@ -116,18 +118,18 @@ func TestMemoryBotStore_RemoveBot(t *testing.T) {
 
 func TestMemoryBotStore_AllBots(t *testing.T) {
 	bs := NewMemoryBotStore()
-	bs.AddBot(&OAuthPayload{
-		Team: "T7654321",
+	bs.AddBot(&oauth.AccessResponse{
+		TeamID: "T7654321",
 	})
 
 	tests := []struct {
 		name    string
 		bs      *MemoryBotStore
-		want    []*OAuthPayload
+		want    []*oauth.AccessResponse
 		wantErr bool
 	}{
-		{"", bs, []*OAuthPayload{
-			{Team: "T7654321"},
+		{"", bs, []*oauth.AccessResponse{
+			{TeamID: "T7654321"},
 		}, false},
 	}
 

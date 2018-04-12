@@ -101,7 +101,7 @@ There are 3 main storage interfaces
 
 - [BotStore](https://godoc.org/suy.io/bots/slack#BotStore)
 
-  This essentially stores `OAuthPayload`s of all bots that have been authenticated with the service. A custom implementation can be provided by passing it inside `WithBotStore` function when initializing a controller. An example [redis implementation](https://godoc.org/suy.io/bots/slack/contrib/redis#RedisBotStore).
+  This essentially stores `oauth.AccessResponse`s of all bots that have been authenticated with the service. A custom implementation can be provided by passing it inside `WithBotStore` function when initializing a controller. An example [redis implementation](https://godoc.org/suy.io/bots/slack/contrib/redis#RedisBotStore).
 
 - [ConversationStore](https://godoc.org/suy.io/bots/slack#ConversationStore)
 
