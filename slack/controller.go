@@ -203,7 +203,7 @@ func (c *Controller) OAuthHandler(redirect, expectedState string, onSuccess func
 
 		payload, err := oauth.Access(&oauth.AccessRequest{c.clientID, c.clientSecret, code, redirect})
 		if err != nil {
-			http.Error(res, err.Error(), http.StatusInternalServerError)
+			http.Error(res, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 

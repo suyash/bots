@@ -9,6 +9,7 @@ import (
 
 	"suy.io/bots/slack"
 	"suy.io/bots/slack/api/chat"
+	"suy.io/bots/slack/api/oauth"
 )
 
 var appID, clientID, clientSecret, scopes, redirect, state, port string
@@ -49,7 +50,7 @@ func main() {
 	http.HandleFunc("/slack/oauth", c.OAuthHandler(
 		redirect,
 		state,
-		func(p *slack.OAuthPayload, w http.ResponseWriter, r *http.Request) {
+		func(p *oauth.AccessResponse, w http.ResponseWriter, r *http.Request) {
 			log.Println("/slack/oauth")
 			http.Redirect(w, r, "https://slack.com/app_redirect?app="+appID, http.StatusFound)
 		},
