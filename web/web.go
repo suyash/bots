@@ -26,4 +26,6 @@ var (
 	ErrBotNotFound         = errors.New("Bot Not Found")
 	ErrBotAlreadyAdded     = errors.New("Bot Already Added")
 	ErrCannotAddThreadZero = errors.New("Cannot explicitly add a thread with ID zero")
+
+	ErrInvalidItem = errors.New("Invalid Item")
 )

@@ -3,8 +3,6 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 // The types here need to have 1:1 correspondence with message.ts
@@ -118,8 +116,6 @@ func (t *Thread) ItemType() ItemType {
 }
 
 var _ Item = &Thread{}
-
-var ErrInvalidItem = errors.New("Invalid Item")
 
 func UnmarshalJSONItem(js []byte) (Item, error) {
 	s := &struct {
