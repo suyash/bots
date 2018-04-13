@@ -8,4 +8,5 @@ go_import_path: suy.io/bots
 before_install:
   - go get github.com/mattn/goveralls
 script:
-  - $GOPATH/bin/goveralls -v -race -show -service=travis-ci ./...
+  - go test -v -race ./...
+  - $GOPATH/bin/goveralls -service=travis-ci
