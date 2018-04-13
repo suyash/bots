@@ -10,13 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrNilControllerStore   = errors.New("Controller Store cannot be nil")
-	ErrNilConversationStore = errors.New("Conversation Store cannot be nil")
-	ErrNilErrorHandler      = errors.New("ErrorHandler cannot be nil")
-	ErrNilIDCreator         = errors.New("ID Creator cannot be nil")
-)
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,

@@ -10,13 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrIDNotSet       = errors.New("cannot send a message without ID set")
-	ErrPrevNextNotSet = errors.New("cannot send a message without either prev or next set")
-	ErrSourceNotSet   = errors.New("cannot send a message without source set")
-	ErrTypeNotSet     = errors.New("cannot send a message without type set")
-)
-
 // ffjson: skip
 type Bot struct {
 	id   BotID

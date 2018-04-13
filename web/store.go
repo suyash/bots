@@ -3,16 +3,6 @@ package web
 import (
 	"sort"
 	"sync"
-
-	"github.com/pkg/errors"
-)
-
-var (
-	ErrItemNotFound        = errors.New("Item Not Found")
-	ErrThreadNotFound      = errors.New("Thread Not Found")
-	ErrBotNotFound         = errors.New("Bot Not Found")
-	ErrBotAlreadyAdded     = errors.New("Bot Already Added")
-	ErrCannotAddThreadZero = errors.New("Cannot explicitly add a thread with ID zero")
 )
 
 type ControllerStore interface {

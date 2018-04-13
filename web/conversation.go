@@ -1,20 +1,5 @@
 package web
 
-import (
-	"github.com/pkg/errors"
-)
-
-var (
-	ErrConversationExists        = errors.New("Conversation Already Exists")
-	ErrConversationNotFound      = errors.New("Conversation Not Found")
-	ErrConversationAlreadyActive = errors.New("Conversation Already Active")
-	ErrNoStartState              = errors.New("Conversation Has no start state")
-
-	ErrStateAlreadyExists = errors.New("State Already Defined")
-
-	ErrNilHandler = errors.New("Nil Handler")
-)
-
 // ffjson: skip
 type Controls struct {
 	b *Bot
