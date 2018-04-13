@@ -5,6 +5,7 @@ require (
 	"github.com/golang/glog" v0.0.0-20160126235308-23def4e6c14b
 	"github.com/google/go-querystring" v0.0.0-20170111101155-53e6ce116135
 	"github.com/gorilla/websocket" v1.2.0
+	"github.com/microcosm-cc/bluemonday" v0.0.0-20180327211928-995366fdf961
 	"github.com/pkg/errors" v0.8.0
 	"github.com/pquerna/ffjson" v0.0.0-20171002144729-d49c2bc1aa13
 	"golang.org/x/net" v0.0.0-20180406214816-61147c48b25b
