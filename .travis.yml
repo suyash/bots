@@ -8,4 +8,4 @@ go_import_path: suy.io/bots
 before_install:
   - go get github.com/mattn/goveralls
 script:
-  - $GOPATH/bin/goveralls -v -race -show -ignore *_ffjson.go -service=travis-ci
+  - $GOPATH/bin/goveralls -v -race -show -service=travis-ci ./...
