@@ -1,0 +1,78 @@
+{{define "partials/templates"}}
+<template id="user-message">
+    <div class="message user-message">
+        <section></section>
+    </div>
+</template>
+
+<template id="bot-message">
+    <div class="message bot-message">
+        <section>
+            <div class="attachments hidden"></div>
+            <div class="text"></div>
+        </section>
+    </div>
+</template>
+
+<template id="thread">
+    <div class="thread open">
+        <header class="thread-opener">
+            <a href="#">
+                <span class="arrow"></span>
+                <span>Thread</span>
+            </a>
+        </header>
+        <div class="messages"></div>
+        <form class="form" action="/" method="post">
+            <input type="text" name="message" placeholder="enter" required="required">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</template>
+
+<template id="attachment_image">
+    <div class="attachment_image">
+        <img src="" alt="">
+        <div>
+            <p><b><span class="attachment_title"></span></b></p>
+            <p><span class="attachment_text"></span></p>
+        </div>
+    </div>
+</template>
+
+<template id="attachment_audio">
+    <div class="attachment_audio">
+        <audio src="" controls></audio>
+        <div>
+            <p><b><span class="attachment_title"></span></b></p>
+            <p><span class="attachment_text"></span></p>
+        </div>
+    </div>
+</template>
+
+<template id="attachment_video">
+    <div class="attachment_video">
+        <video src="" controls></video>
+        <div>
+            <p><b><span class="attachment_title"></span></b></p>
+            <p><span class="attachment_text"></span></p>
+        </div>
+    </div>
+</template>
+
+<template id="attachment_location">
+    <div class="attachment_location">
+        <img src="">
+        <div>
+            <p><b><span class="attachment_title"></span></b></p>
+            <p><span class="attachment_text"></span></p>
+        </div>
+    </div>
+</template>
+
+<template id="attachment_file_download">
+    <div class="attachment_file_download">
+        <a download="download" href=""><span class="attachment_text"></span></a>
+    </div>
+</template>
+{{end}}

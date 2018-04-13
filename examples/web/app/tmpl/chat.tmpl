@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {{template "partials/header"}}
+    <style>
+        #chat {
+            height: 100%;
+            padding-top: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .messages {
+            width: 60%;
+            height: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+
+            flex-grow: 1;
+            overflow: auto;
+
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+            box-sizing: border-box;
+            max-width: 60%;
+            min-width: 40%;
+            margin: 5px 0;
+        }
+
+        .message section {
+            padding: 5px 10px 5px 10px;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            border-left: 6px solid aqua;
+        }
+
+        .user-message {
+            border-right: 6px solid springgreen;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .form {
+            width: 60%;
+            display: flex;
+            padding: 40px 0;
+        }
+
+        .form #message {
+            display: block;
+            flex-grow: 1;
+        }
+
+        .thread .messages {
+            display: none;
+            width: 100%;
+            height: auto;
+            padding: 0 0 0 20px;
+            flex-grow: 0;
+        }
+
+        .thread.open .messages {
+            display: flex;
+        }
+
+        .thread .form {
+            display: none;
+            width: 100%;
+            padding: 10px 0 10px 20px;
+        }
+
+        .thread.open .form {
+            display: flex;
+        }
+
+        .thread .thread-opener {
+            border-left: 6px solid royalblue;
+            padding: 5px 0 5px 14px;
+        }
+
+        .thread .thread-opener a {
+            display: block;
+            text-decoration: none;
+        }
+
+        .thread .thread-opener .arrow::before {
+            content: "▸";
+        }
+
+        .thread.open .thread-opener .arrow::before {
+            content: "▼";
+        }
+
+        .attachment_image img {
+            max-width: 100%;
+        }
+
+        .attachment_video video {
+            max-width: 100%;
+        }
+
+        .attachment_location img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    {{template "partials/templates"}}
+
+    <div id="chat">
+        <div class="messages"></div>
+        <form class="form" action="/" method="post">
+            <input type="text" name="message" id="message" placeholder="enter" required="required">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="{{.Script}}"></script>
+</body>
+</html>

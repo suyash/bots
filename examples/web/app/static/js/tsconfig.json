@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "commonjs",
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "outDir": "./lib",
+        "removeComments": true,
+        "skipLibCheck": true,
+        "sourceMap": false,
+        "target": "es2017"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

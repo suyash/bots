@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {{template "partials/header"}}
+    <style>
+        body {
+            padding: 80px 240px;
+        }
+    </style>
+</head>
+<body>
+    <ul>
+        {{range .Items}}
+        <li>
+            <a href="{{.Link}}">{{.Name}}</a>
+        </li>
+        {{end}}
+    </ul>
+</body>
+</html>
