@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "declaration": true,
+        "forceConsistentCasingInFileNames": true,
+        "lib": [
+          "dom",
+          "es2017",
+          "esnext.asynciterable"
+        ],
+        "module": "umd",
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "outDir": "./lib",
+        "removeComments": true,
+        "sourceMap": false,
+        "target": "es2017"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

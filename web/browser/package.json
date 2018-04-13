@@ -1,0 +1,26 @@
+{
+  "name": "@suy/bots-web-client",
+  "version": "0.2.5",
+  "main": "lib/chat.js",
+  "types": "lib/chat.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "clean": "rm -rf lib",
+    "lint": "tslint -p . --fix",
+    "prepare": "npm run clean && npm run build  ",
+    "test": "jest",
+    "watch": "rollup -c -w"
+  },
+  "author": "Suyash",
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^0.57.1",
+    "rollup-plugin-commonjs": "^9.1.0",
+    "rollup-plugin-json": "^2.3.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-progress": "^0.4.0",
+    "rollup-plugin-typescript2": "^0.12.0",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1"
+  }
+}
