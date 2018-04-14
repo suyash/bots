@@ -6,7 +6,7 @@ A little library to write chatbots in go.
 
 ## web
 
-> more examples in [examples/web/bots](examples/web/bots). Small Deployment example in [examples/web/app](examples/web/app). Also deployed online on https://app-eyujcduejj.now.sh/.
+> more examples in [examples/web/bots](examples/web/bots). Small Deployment example in [examples/web/app](examples/web/app). Also deployed online on https://app-yydcvqhqze.now.sh/.
 
 ```go
 package main
