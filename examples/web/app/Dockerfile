@@ -9,7 +9,7 @@ RUN npm run build
 FROM golang:alpine as builder
 WORKDIR /go/src/app
 RUN apk add --no-cache git
-COPY . .
+COPY main.go main.go
 RUN go get -d -v ./...
 RUN go install -v ./...
 
