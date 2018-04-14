@@ -10,6 +10,7 @@ import (
 
 var ErrBotNotFound = errors.New("No Such registered team")
 
+// MessageHandler is a callback to attach that is invoked whenever a new message is received
 type MessageHandler func(msg []byte, team string)
 
 // ffjson: skip
@@ -18,18 +19,22 @@ type connection struct {
 	url  string
 }
 
+// Connector internally manages connections to slack teams.
+//
 // ffjson: skip
 type Connector struct {
 	bots          map[string]*connection
 	handleMessage MessageHandler
 }
 
+// NewConnector creates a new Connector object
 func NewConnector() *Connector {
 	return &Connector{
 		bots: make(map[string]*connection),
 	}
 }
 
+// Open opens a websocket connection for the passed URL and assigns it to the given team.
 func (c *Connector) Open(team, url string) error {
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
@@ -41,6 +46,7 @@ func (c *Connector) Open(team, url string) error {
 	return nil
 }
 
+// SetMessageHandler sets the message handler for the connector.
 func (c *Connector) SetMessageHandler(messageHandler MessageHandler) {
 	c.handleMessage = messageHandler
 }
@@ -52,6 +58,7 @@ type typingPayload struct {
 	Type    string `json:"type"`
 }
 
+// Typing sends a typing payload.
 func (c *Connector) Typing(team, channel string) error {
 	co, ok := c.bots[team]
 	if !ok {
@@ -93,6 +100,7 @@ func (c *Connector) readConn(conn *websocket.Conn, team string) {
 	}
 }
 
+// MessagePayload is the payload received from slack over a connection.
 type MessagePayload struct {
 	Message json.RawMessage `json:"message"`
 	Team    string          `json:"team"`
