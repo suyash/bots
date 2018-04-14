@@ -28,19 +28,14 @@ func main() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/chat", c.ConnectionHandler())
 
-	go handleBots(c)
+	go handleMessages(c)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func handleBots(c *web.Controller) {
-	for bot := range c.BotAdded() {
-		go handleMessages(bot)
-	}
-}
-
-func handleMessages(b *web.Bot) {
-	for msg := range b.DirectMessages() {
-		b.Say(msg)
+func handleMessages(c *web.Controller) {
+	for msg := range c.DirectMessages() {
+		msg.Reply(web.TextMessage(msg.Text))
 	}
 }
 
@@ -82,7 +77,7 @@ import Chat from "@suy/bots-web-client";
 
 window.addEventListener("DOMContentLoaded", loaded);
 async function loaded() {
-    const chat = new Chat("ws://localhost:8080/chat");
+    const chat = new Chat(`ws://${window.location.host}/chat`);
     await chat.open();
 
     const form = document.querySelector("#form");
@@ -95,8 +90,7 @@ async function loaded() {
 
     for await (const msg of chat.messages()) {
         log("received", msg);
-        botMessage.content.querySelector("section").textContent = msg.text;
-        container.appendChild(document.importNode(botMessage.content, true));
+	...
     }
 
     log("closed")
