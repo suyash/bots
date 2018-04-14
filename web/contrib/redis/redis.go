@@ -19,7 +19,7 @@ type RedisControllerStore struct {
 	bots   map[web.BotID]*RedisItemStore
 }
 
-func NewRedisControllerStore(host string) *RedisControllerStore {
+func NewRedisControllerStore(host string) (*RedisControllerStore, error) {
 	c := redis.NewClient(&redis.Options{
 		Addr:     host,
 		Password: "",
@@ -27,10 +27,10 @@ func NewRedisControllerStore(host string) *RedisControllerStore {
 	})
 
 	if _, err := c.Ping().Result(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return &RedisControllerStore{c, make(map[web.BotID]*RedisItemStore)}
+	return &RedisControllerStore{c, make(map[web.BotID]*RedisItemStore)}, nil
 }
 
 func (rcs *RedisControllerStore) Add(botID web.BotID) error {
@@ -56,7 +56,7 @@ func (rcs *RedisControllerStore) Remove(botID web.BotID) error {
 	delete(rcs.bots, botID)
 
 	if err := rcs.client.SRem("bots", int64(botID)).Err(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
@@ -132,7 +132,7 @@ func (is *RedisItemStore) Add(item web.Item) error {
 func (is *RedisItemStore) save(item web.Item, keyPrefix string) error {
 	s, err := json.Marshal(item)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// itemKey = botID:threadID:itemID
@@ -305,7 +305,7 @@ type RedisConversationStore struct {
 	client *redis.Client
 }
 
-func NewRedisConversationStore(host string) *RedisConversationStore {
+func NewRedisConversationStore(host string) (*RedisConversationStore, error) {
 	c := redis.NewClient(&redis.Options{
 		Addr:     host,
 		Password: "",
@@ -313,10 +313,10 @@ func NewRedisConversationStore(host string) *RedisConversationStore {
 	})
 
 	if _, err := c.Ping().Result(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return &RedisConversationStore{c}
+	return &RedisConversationStore{c}, nil
 }
 
 func (cs *RedisConversationStore) Start(botid web.BotID, id string) error {
