@@ -21,7 +21,10 @@ type RedisBots struct {
 }
 
 func NewRedisBots(redisHost string, t *template.Template, pc PageContext) (*RedisBots, error) {
-	store := redis.NewRedisControllerStore(redisHost)
+	store, err := redis.NewRedisControllerStore(redisHost)
+	if err != nil {
+		return nil, err
+	}
 
 	c, err := web.NewController(
 		web.WithControllerStore(store),
