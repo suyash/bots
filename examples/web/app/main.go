@@ -10,6 +10,13 @@ import (
 
 var templates *template.Template
 
+var examples = []struct{ Name, Link string }{
+	{"echo", "/echo"},
+	{"threads", "/threads"},
+	{"attachments", "/attachments"},
+	{"conversations", "/conversations"},
+}
+
 func main() {
 	var err error
 
@@ -57,6 +64,16 @@ func main() {
 	http.Handle("/attachments", a)
 	http.HandleFunc("/attachments_chat", a.ConnectionHandler())
 
+	r, err := bots.NewRedisBots("redis:6379", templates, bots.PageContext{"redis", "/static/js/lib/redis.js"})
+	if err != nil {
+		log.Println("Not adding redis bots", err)
+	} else {
+		http.Handle("/redis", r)
+		http.HandleFunc("/redis_chat", r.ConnectionHandler())
+
+		examples = append(examples, struct{ Name, Link string }{"redis", "/redis"})
+	}
+
 	http.HandleFunc("/", index)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -66,12 +83,6 @@ func index(res http.ResponseWriter, req *http.Request) {
 	templates.ExecuteTemplate(res, "index.tmpl", struct {
 		Items []struct{ Name, Link string }
 	}{
-		Items: []struct{ Name, Link string }{
-			{"echo", "/echo"},
-			{"threads", "/threads"},
-			{"attachments", "/attachments"},
-			{"conversations", "/conversations"},
-			// {"redis", "/redis"},
-		},
+		Items: examples,
 	})
 }
