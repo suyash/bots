@@ -14,8 +14,11 @@ import (
 	"suy.io/bots/slack/api/dialog"
 )
 
+// CommandImmediateResponseTimeout is the maximum time a command invocation waits
+// before assuming you'll reply using the ResponseURL
 const CommandImmediateResponseTimeout = 2000 * time.Millisecond
 
+// Command is the payload sent by slack for a command.
 // ffjson: skip
 type Command struct {
 	immediateResponse chan []byte
@@ -34,6 +37,7 @@ type Command struct {
 	TriggerID      string `json:"trigger_id"`
 }
 
+// newCommand creates a new command from query parameters.
 func newCommand(vals url.Values) *Command {
 	ans := &Command{}
 
@@ -55,12 +59,14 @@ func newCommand(vals url.Values) *Command {
 	return ans
 }
 
+// commandResponse represents the payload sent as a response to a command.
 // ffjson: nodecoder
 type commandResponse struct {
 	*chat.Message
 	ResponseType string `json:"response_type,omitempty"`
 }
 
+// RespondImmediately sends an immediate response to a command
 func (command *Command) RespondImmediately(msg *chat.Message, inChannel bool) error {
 	resType := "ephemeral"
 	if inChannel {
@@ -81,6 +87,7 @@ func (command *Command) RespondImmediately(msg *chat.Message, inChannel bool) er
 	return nil
 }
 
+// Respond responds to a command using the response URL
 func (command *Command) Respond(msg *chat.Message, inChannel bool) error {
 	if command.responded == 5 {
 		// TODO: also check for 30 minutes condition
@@ -117,6 +124,7 @@ func (command *Command) Respond(msg *chat.Message, inChannel bool) error {
 	return nil
 }
 
+// OpenDialog opens a dialog as a response to a command.
 func (command *Command) OpenDialog(d *dialog.Dialog, token string) error {
 	if err := dialog.Open(&dialog.OpenRequest{TriggerID: command.TriggerID, Token: token, Dialog: d}); err != nil {
 		return errors.Wrap(err, "OpenDialog Failed")
@@ -125,11 +133,13 @@ func (command *Command) OpenDialog(d *dialog.Dialog, token string) error {
 	return nil
 }
 
+// RespondWithEmptyBody responds to a command with an empty response.
 func (command *Command) RespondWithEmptyBody() error {
 	close(command.immediateResponse)
 	return nil
 }
 
+// RespondWithErrors sends errors as a command response.
 func (command *Command) RespondWithErrors(errs []*dialog.Error) error {
 	derrs := struct {
 		Items []*dialog.Error `json:"errors"`

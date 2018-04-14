@@ -13,8 +13,12 @@ import (
 	"suy.io/bots/slack/api/dialog"
 )
 
+// InteractionImmediateResponseTimeout is the amount of time an interaction request will wait
+// before it returns with 200 and assumes that ResponseURL will be used to respond.
 const InteractionImmediateResponseTimeout = 2000 * time.Millisecond
 
+// Interaction represents the payload received for an interaction.
+//
 // ffjson: skip
 type Interaction struct {
 	responded         int8
@@ -54,6 +58,7 @@ type Interaction struct {
 	Submission      json.RawMessage `json:"submission"`
 }
 
+// OpenDialog opens a dialog for the current interaction.
 func (iact *Interaction) OpenDialog(d *dialog.Dialog) error {
 	if err := dialog.Open(&dialog.OpenRequest{TriggerID: iact.TriggerID, Token: iact.token, Dialog: d}); err != nil {
 		return errors.Wrap(err, "OpenDialog Failed")
@@ -62,6 +67,8 @@ func (iact *Interaction) OpenDialog(d *dialog.Dialog) error {
 	return nil
 }
 
+// RespondImmediately responds immediately to an interaction.
+//
 // TODO: the channel is closed after the first time, what then?
 func (iact *Interaction) RespondImmediately(msg *chat.Message) error {
 	if msg == nil {
@@ -77,6 +84,7 @@ func (iact *Interaction) RespondImmediately(msg *chat.Message) error {
 	return nil
 }
 
+// Respond responds to an interaction using the ResponseURL.
 func (iact *Interaction) Respond(msg *chat.Message) error {
 	if iact.responded == 5 {
 		// TODO: also check for 30 minutes condition
@@ -107,11 +115,13 @@ func (iact *Interaction) Respond(msg *chat.Message) error {
 	return nil
 }
 
+// RespondWithEmptyBody responds with an empty body.
 func (iact *Interaction) RespondWithEmptyBody() error {
 	close(iact.immediateResponse)
 	return nil
 }
 
+// RespondWithErrors responds with an error payload.
 func (iact *Interaction) RespondWithErrors(errs []*dialog.Error) error {
 	derrs := struct {
 		Items []*dialog.Error `json:"errors"`
@@ -126,6 +136,8 @@ func (iact *Interaction) RespondWithErrors(errs []*dialog.Error) error {
 	return nil
 }
 
+// InteractionOptions is the payload received for an Interaction Options Request.
+//
 // ffjson: skip
 type InteractionOptions struct {
 	immediateResponse chan []byte
@@ -150,12 +162,16 @@ type InteractionOptions struct {
 	AttachmentID string `json:"attachment_id"`
 }
 
+// InteractionOptionsResponse is the response payload sent as a response to an interaction
+// options request.
+//
 // ffjson: nodecoder
 type InteractionOptionsResponse struct {
 	Options      []*chat.Option      `json:"options,omitempty"`
 	OptionGroups []*chat.OptionGroup `json:"option_groups,omitempty"`
 }
 
+// Respond responds to an interaction options request.
 func (iactopt *InteractionOptions) Respond(msg *InteractionOptionsResponse) error {
 	d, err := json.Marshal(msg)
 	if err != nil {

@@ -32,8 +32,6 @@ func main() {
 		select {
 		case msg := <-c.DirectMessages():
 			log.Println("DirectMessage:", msg)
-		case msg := <-c.SelfMessages():
-			log.Println("SelfMessage:", msg)
 		case msg := <-c.DirectMentions():
 			log.Println("DirectMention:", msg)
 		case msg := <-c.Mentions():

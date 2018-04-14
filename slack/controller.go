@@ -17,6 +17,8 @@ import (
 	"suy.io/bots/slack/api/team"
 )
 
+// Controller is essentially a manager for a single slack App.
+//
 // ffjson: skip
 type Controller struct {
 	clientID     string
@@ -30,7 +32,6 @@ type Controller struct {
 	botAdded      chan *Bot
 
 	directMessages  chan *MessagePair
-	selfMessages    chan *MessagePair
 	directMentions  chan *MessagePair
 	mentions        chan *MessagePair
 	ambientMessages chan *MessagePair
@@ -44,13 +45,13 @@ type Controller struct {
 	commands chan *Command
 }
 
+// NewController creates a new Controller using the provided functional arguments.
 func NewController(options ...func(*Controller) error) (*Controller, error) {
 	controller := &Controller{
 		conversations: NewConversationRegistry(),
 		botAdded:      make(chan *Bot),
 
 		directMessages:  make(chan *MessagePair),
-		selfMessages:    make(chan *MessagePair),
 		directMentions:  make(chan *MessagePair),
 		mentions:        make(chan *MessagePair),
 		ambientMessages: make(chan *MessagePair),
@@ -83,7 +84,6 @@ func NewController(options ...func(*Controller) error) (*Controller, error) {
 	}
 
 	// load cached bots from storage
-
 	bots, err := controller.bots.AllBots()
 	if err != nil {
 		return nil, errors.Wrap(err, "NewController Failed")
@@ -100,6 +100,7 @@ func NewController(options ...func(*Controller) error) (*Controller, error) {
 	return controller, nil
 }
 
+// WithClientID can be passed to NewController to set the Slack Client ID.
 func WithClientID(id string) func(*Controller) error {
 	return func(c *Controller) error {
 		if id == "" {
@@ -111,6 +112,7 @@ func WithClientID(id string) func(*Controller) error {
 	}
 }
 
+// WithClientSecret can be passed to NewController to set the Slack Client Secret.
 func WithClientSecret(secret string) func(*Controller) error {
 	return func(c *Controller) error {
 		if secret == "" {
@@ -122,6 +124,7 @@ func WithClientSecret(secret string) func(*Controller) error {
 	}
 }
 
+// WithVerification can be passed to NewController to set the slack Verification token.
 func WithVerification(secret string) func(*Controller) error {
 	return func(c *Controller) error {
 		if secret == "" {
@@ -133,6 +136,7 @@ func WithVerification(secret string) func(*Controller) error {
 	}
 }
 
+// WithConnector can set a custom Connector instance to manage WebSocket connections.
 func WithConnector(conn Connector) func(*Controller) error {
 	return func(c *Controller) error {
 		if conn == nil {
@@ -144,6 +148,7 @@ func WithConnector(conn Connector) func(*Controller) error {
 	}
 }
 
+// WithBotStore sets a custom BotStore implementation for storing bot data.
 func WithBotStore(b BotStore) func(*Controller) error {
 	return func(c *Controller) error {
 		if b == nil {
@@ -155,6 +160,7 @@ func WithBotStore(b BotStore) func(*Controller) error {
 	}
 }
 
+// WithConversationStore sets a custom ConversationStore implementation for storing conversation data.
 func WithConversationStore(cs ConversationStore) func(*Controller) error {
 	return func(c *Controller) error {
 		if cs == nil {
@@ -172,6 +178,7 @@ func (c *Controller) listen() {
 	}
 }
 
+// CreateAddToSlackURL creates a slack OAuth authorize URL.
 func (c *Controller) CreateAddToSlackURL(scopes []string, redirect, state string) (string, error) {
 	v := make(url.Values)
 	v.Add("client_id", c.clientID)
@@ -182,15 +189,7 @@ func (c *Controller) CreateAddToSlackURL(scopes []string, redirect, state string
 	return "https://slack.com/oauth/authorize?" + v.Encode(), nil
 }
 
-func (c *Controller) CreateAddToSlackButton(scopes []string, redirect, state string) (string, error) {
-	url, err := c.CreateAddToSlackURL(scopes, redirect, state)
-	if err != nil {
-		return "", errors.Wrap(err, "CreateAddToSlackButton Failed")
-	}
-
-	return `<a href="` + url + `"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`, nil
-}
-
+// OAuthHandler returns a http.HandlerFunc that can complete OAuth handshake with slack, creating new Bots.
 func (c *Controller) OAuthHandler(redirect, expectedState string, onSuccess func(*oauth.AccessResponse, http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		code := req.URL.Query().Get("code")
@@ -223,6 +222,7 @@ func (c *Controller) OAuthHandler(redirect, expectedState string, onSuccess func
 	}
 }
 
+// CreateBot adds a new Bot given a slack access token.
 func (c *Controller) CreateBot(token string) (*Bot, error) {
 	info, err := team.Info(&team.InfoRequest{Token: token})
 	if err != nil {
@@ -240,10 +240,12 @@ func (c *Controller) CreateBot(token string) (*Bot, error) {
 	return b, nil
 }
 
+// BotAdded returns a receive only channel that gets a payload each time a new bot is added.
 func (c *Controller) BotAdded() <-chan *Bot {
 	return c.botAdded
 }
 
+// EventHandler returns a http.HandlerFunc that can listen to slack events.
 func (c *Controller) EventHandler() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
@@ -284,6 +286,8 @@ func (c *Controller) EventHandler() http.HandlerFunc {
 	}
 }
 
+// Event is a placeholder for event key payload in the Event payload
+//
 // ffjson: noencoder
 type Event struct {
 	*rtm.Message
@@ -291,6 +295,8 @@ type Event struct {
 	EventTs string `json:"event_ts"`
 }
 
+// EventPayload represents the entire payload received for a slack event.
+//
 // ffjson: noencoder
 type EventPayload struct {
 	Token       string   `json:"token"`
@@ -336,6 +342,7 @@ type interaction struct {
 	Token string `json:"token"`
 }
 
+// InteractionHandler returns a http.HandlerFunc that can be used to handle interactions from slack.
 func (c *Controller) InteractionHandler() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
@@ -399,6 +406,7 @@ type interactionOptions struct {
 	Token string `json:"token"`
 }
 
+// InteractionOptionsHandler returns a http.HandlerFunc that can handle options requests.
 // NOTE: this blocks calling thread
 func (c *Controller) InteractionOptionsHandler() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
@@ -461,6 +469,7 @@ func (c *Controller) InteractionOptionsHandler() http.HandlerFunc {
 	}
 }
 
+// CommandHandler returns a http.HandlerFunc that can handle slack Command requests.
 func (c *Controller) CommandHandler() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
@@ -510,6 +519,8 @@ func (c *Controller) CommandHandler() http.HandlerFunc {
 	}
 }
 
+// Commands returns a receive only channel that'll send a value each time a new command
+// invocation is made.
 func (c *Controller) Commands() <-chan *Command {
 	if c.commands == nil {
 		c.commands = make(chan *Command)
@@ -609,17 +620,15 @@ func (c *Controller) handleNormalMessage(msg *rtm.Message, bot *Bot) error {
 		return nil
 	}
 
-	if msg.User == bot.id {
-		return c.handleSelfMessage(msg, bot)
-	} else if strings.HasPrefix(msg.Channel, "D") {
+	if strings.HasPrefix(msg.Channel, "D") {
 		return c.handleDirectMessage(msg, bot)
 	} else if strings.HasPrefix(msg.Text, "<@"+bot.id) {
 		return c.handleDirectMention(msg, bot)
 	} else if strings.Contains(msg.Text, "<@"+bot.id) {
 		return c.handleMention(msg, bot)
-	} else {
-		return c.handleAmbientMessage(msg, bot)
 	}
+
+	return c.handleAmbientMessage(msg, bot)
 }
 
 func (c *Controller) handleDirectMessage(m *rtm.Message, b *Bot) error {
@@ -627,17 +636,9 @@ func (c *Controller) handleDirectMessage(m *rtm.Message, b *Bot) error {
 	return nil
 }
 
+// DirectMessages returns a receive only channel to get direct messages.
 func (c *Controller) DirectMessages() <-chan *MessagePair {
 	return c.directMessages
-}
-
-func (c *Controller) handleSelfMessage(m *rtm.Message, b *Bot) error {
-	go func() { c.selfMessages <- &MessagePair{m, b} }()
-	return nil
-}
-
-func (c *Controller) SelfMessages() <-chan *MessagePair {
-	return c.selfMessages
 }
 
 func (c *Controller) handleDirectMention(m *rtm.Message, b *Bot) error {
@@ -645,6 +646,7 @@ func (c *Controller) handleDirectMention(m *rtm.Message, b *Bot) error {
 	return nil
 }
 
+// DirectMentions returns messages which are sent by mentioning the bot as the first term.
 func (c *Controller) DirectMentions() <-chan *MessagePair {
 	return c.directMentions
 }
@@ -654,6 +656,7 @@ func (c *Controller) handleMention(m *rtm.Message, b *Bot) error {
 	return nil
 }
 
+// Mentions are messages where the bot is mentioned somewhere in the middle.
 func (c *Controller) Mentions() <-chan *MessagePair {
 	return c.mentions
 }
@@ -663,6 +666,7 @@ func (c *Controller) handleAmbientMessage(m *rtm.Message, b *Bot) error {
 	return nil
 }
 
+// AmbientMessages are messages in conversations that the bot is in, but not mentioned in the message.
 func (c *Controller) AmbientMessages() <-chan *MessagePair {
 	return c.ambientMessages
 }
@@ -676,6 +680,7 @@ func (c *Controller) handleChannelJoin(msg []byte, b *Bot) {
 	go func() { c.channelJoin <- &ChannelJoinMessagePair{m, b} }()
 }
 
+// ChannelJoin sends a payload each time the bot is added to a new channel.
 func (c *Controller) ChannelJoin() <-chan *ChannelJoinMessagePair {
 	return c.channelJoin
 }
@@ -689,6 +694,7 @@ func (c *Controller) handleUserChannelJoin(msg []byte, bot *Bot) {
 	go func() { c.userChannelJoin <- &UserChannelJoinMessagePair{m, bot} }()
 }
 
+// UserChannelJoin sends a payload each time a user joins a new channel.
 func (c *Controller) UserChannelJoin() <-chan *UserChannelJoinMessagePair {
 	return c.userChannelJoin
 }
@@ -702,6 +708,7 @@ func (c *Controller) handleGroupJoin(msg []byte, bot *Bot) {
 	go func() { c.groupJoin <- &GroupJoinMessagePair{m, bot} }()
 }
 
+// GroupJoin sends a payload each time a user joins a group chat.
 func (c *Controller) GroupJoin() <-chan *GroupJoinMessagePair {
 	return c.groupJoin
 }
@@ -710,14 +717,17 @@ func (c *Controller) GroupJoin() <-chan *GroupJoinMessagePair {
 // Interactions
 //
 
+// Interactions returns a payload for each new interaction
 func (c *Controller) Interactions() <-chan *InteractionPair {
 	return c.interactions
 }
 
+// InteractionOptions returns a payload each time a new option is added.
 func (c *Controller) InteractionOptions() <-chan *InteractionOptionsPair {
 	return c.interactionOptions
 }
 
+// RegisterConversation registers a new conversation with the bot.
 func (c *Controller) RegisterConversation(name string, conv *Conversation) error {
 	return c.conversations.Add(name, conv)
 }

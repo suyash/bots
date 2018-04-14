@@ -8,7 +8,7 @@ import (
 	"suy.io/bots/slack/api/rtm"
 )
 
-// ffjson: skip
+// Bot represents a single slack bot unique to a slack team.
 type Bot struct {
 	id     string
 	teamID string
@@ -19,6 +19,7 @@ type Bot struct {
 	cs    ConversationStore
 }
 
+// newBot creates a new Bot from a given slack OAuth Response
 func newBot(p *oauth.AccessResponse, c Connector, convs map[string]*Conversation, cs ConversationStore) *Bot {
 	return &Bot{
 		teamID: p.TeamID,
@@ -30,18 +31,22 @@ func newBot(p *oauth.AccessResponse, c Connector, convs map[string]*Conversation
 	}
 }
 
+// BotUser gets the User ID of the Bot
 func (bot *Bot) BotUser() string {
 	return bot.id
 }
 
+// Team gets the ID of the team the bot is in.
 func (bot *Bot) Team() string {
 	return bot.teamID
 }
 
+// Token gets the access token used to create the bot.
 func (bot *Bot) Token() string {
 	return bot.token
 }
 
+// Start opens a WebSocket connection to slack to send and receive messages through this bot.
 func (bot *Bot) Start() error {
 	res, err := rtm.Connect(&rtm.ConnectRequest{Token: bot.token})
 	if err != nil {
@@ -55,10 +60,12 @@ func (bot *Bot) Start() error {
 	return nil
 }
 
+// Typing sends a typing indicator to this bot's connector instance.
 func (bot *Bot) Typing(channel string) error {
 	return bot.c.Typing(bot.teamID, channel)
 }
 
+// Say sends a message in a channel.
 func (bot *Bot) Say(msg *chat.Message) (*chat.Message, error) {
 	if msg.Channel == "" {
 		return nil, ErrChannelUnset
@@ -72,6 +79,7 @@ func (bot *Bot) Say(msg *chat.Message) (*chat.Message, error) {
 	return res.Message, nil
 }
 
+// Reply replies to a user message.
 func (bot *Bot) Reply(msg *rtm.Message, response *chat.Message) (*chat.Message, error) {
 	if msg.ThreadTs != "" {
 		response.ThreadTs = msg.ThreadTs
@@ -91,6 +99,7 @@ func (bot *Bot) Reply(msg *rtm.Message, response *chat.Message) (*chat.Message, 
 	return res, nil
 }
 
+// SayEphemeral sends an ephemeral message in a chat.
 func (bot *Bot) SayEphemeral(msg *chat.EphemeralMessage) (string, error) {
 	if msg.Channel == "" {
 		return "", ErrChannelUnset
@@ -104,6 +113,7 @@ func (bot *Bot) SayEphemeral(msg *chat.EphemeralMessage) (string, error) {
 	return res.MessageTs, nil
 }
 
+// ReplyEphemeral replies to a message with an ephemeral message.
 func (bot *Bot) ReplyEphemeral(msg *rtm.Message, response *chat.EphemeralMessage) (string, error) {
 	if msg.ThreadTs != "" {
 		response.ThreadTs = msg.ThreadTs
@@ -120,6 +130,7 @@ func (bot *Bot) ReplyEphemeral(msg *rtm.Message, response *chat.EphemeralMessage
 	return res, nil
 }
 
+// ReplyInThread replies to a message in a thread, creates one if not in a thread.
 func (bot *Bot) ReplyInThread(msg *rtm.Message, response *chat.Message) (*chat.Message, error) {
 	if msg.ThreadTs == "" {
 		response.ThreadTs = msg.Ts
@@ -137,6 +148,7 @@ func (bot *Bot) ReplyInThread(msg *rtm.Message, response *chat.Message) (*chat.M
 	return res, nil
 }
 
+// Update updates a message.
 func (bot *Bot) Update(ts string, msg *chat.Message) (string, error) {
 	msg.Ts = ts
 
@@ -148,6 +160,8 @@ func (bot *Bot) Update(ts string, msg *chat.Message) (string, error) {
 	return res.Ts, nil
 }
 
+// StartConversation starts the conversation with the given name for the given user
+// in the given channel.
 func (bot *Bot) StartConversation(user, channel, name string) error {
 	c, ok := bot.convs[name]
 	if !ok {

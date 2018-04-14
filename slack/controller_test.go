@@ -34,7 +34,6 @@ func TestNewController(t *testing.T) {
 			botAdded:      make(chan *Bot),
 
 			directMessages:  make(chan *MessagePair),
-			selfMessages:    make(chan *MessagePair),
 			directMentions:  make(chan *MessagePair),
 			mentions:        make(chan *MessagePair),
 			ambientMessages: make(chan *MessagePair),
@@ -67,9 +66,6 @@ func TestNewController(t *testing.T) {
 
 			tt.want.directMessages = nil
 			got.directMessages = nil
-
-			tt.want.selfMessages = nil
-			got.selfMessages = nil
 
 			tt.want.directMentions = nil
 			got.directMentions = nil
@@ -909,35 +905,6 @@ func TestController_handleDirectMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.c.handleDirectMessage(tt.args.m, tt.args.b); (err != nil) != tt.wantErr {
 				t.Errorf("Controller.handleDirectMessage() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestController_handleSelfMessage(t *testing.T) {
-	type args struct {
-		m *rtm.Message
-		b *Bot
-	}
-
-	c, err := NewController()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	tests := []struct {
-		name    string
-		c       *Controller
-		args    args
-		wantErr bool
-	}{
-		{"", c, args{&rtm.Message{Text: "test"}, nil}, false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.c.handleSelfMessage(tt.args.m, tt.args.b); (err != nil) != tt.wantErr {
-				t.Errorf("Controller.handleSelfMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
