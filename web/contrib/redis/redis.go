@@ -253,7 +253,7 @@ func (is *RedisItemStore) get(id, threadID string) (web.Item, error) {
 		return nil, err
 	}
 
-	return web.UnmarshalJSONItem([]byte(res))
+	return UnmarshalJSONItem([]byte(res))
 }
 
 func (is *RedisItemStore) Last(n int64, thread web.ItemID) (items []web.Item, err error) {
@@ -366,3 +366,33 @@ func (cs *RedisConversationStore) End(botid web.BotID) error {
 }
 
 var _ web.ConversationStore = &RedisConversationStore{}
+
+// UnmarshalJSONItem unmarshals a JSON payload into an item depending on whether the item
+// is a message or a thread
+func UnmarshalJSONItem(js []byte) (web.Item, error) {
+	s := &struct {
+		Type web.ItemType `json:"type"`
+	}{}
+
+	if err := json.Unmarshal(js, s); err != nil {
+		return nil, err
+	}
+
+	if s.Type == web.ThreadItemType {
+		t := &web.Thread{}
+		if err := json.Unmarshal(js, t); err != nil {
+			return nil, err
+		}
+
+		return t, nil
+	} else if s.Type == web.MessageItemType {
+		msg := &web.Message{}
+		if err := json.Unmarshal(js, msg); err != nil {
+			return nil, err
+		}
+
+		return msg, nil
+	}
+
+	return nil, web.ErrInvalidItem
+}

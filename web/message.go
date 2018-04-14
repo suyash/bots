@@ -1,9 +1,5 @@
 package web
 
-import (
-	"encoding/json"
-)
-
 // The types here need to have 1:1 correspondence with message.ts
 
 type BotID int64
@@ -127,36 +123,6 @@ func (t *Thread) ItemType() ItemType {
 }
 
 var _ Item = &Thread{}
-
-// UnmarshalJSONItem unmarshals a JSON payload into an item depending on whether the item
-// is a message or a thread
-func UnmarshalJSONItem(js []byte) (Item, error) {
-	s := &struct {
-		Type ItemType `json:"type"`
-	}{}
-
-	if err := json.Unmarshal(js, s); err != nil {
-		return nil, err
-	}
-
-	if s.Type == ThreadItemType {
-		t := &Thread{}
-		if err := json.Unmarshal(js, t); err != nil {
-			return nil, err
-		}
-
-		return t, nil
-	} else if s.Type == MessageItemType {
-		msg := &Message{}
-		if err := json.Unmarshal(js, msg); err != nil {
-			return nil, err
-		}
-
-		return msg, nil
-	}
-
-	return nil, ErrInvalidItem
-}
 
 // AttachmentType defines a string identifying the type of an message attachment
 type AttachmentType string
