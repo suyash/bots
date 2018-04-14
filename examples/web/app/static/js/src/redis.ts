@@ -13,7 +13,8 @@ let userMessage: HTMLTemplateElement = null;
 let botMessage: HTMLTemplateElement = null;
 
 async function loaded(): Promise<void> {
-    const chat: Chat = new Chat(`ws://${window.location.host}/echo_redis_chat`);
+    // tslint:disable-next-line:max-line-length
+    const chat: Chat = new Chat(`${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/echo_redis_chat`);
     await chat.open();
     log("open");
 

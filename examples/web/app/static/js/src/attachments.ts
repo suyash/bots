@@ -27,7 +27,8 @@ const log: debug.IDebugger = debug("app");
 window.addEventListener("DOMContentLoaded", loaded);
 
 async function loaded(): Promise<void> {
-    const chat: Chat = new Chat(`ws://localhost:8080/attachments_chat`);
+    // tslint:disable-next-line:max-line-length
+    const chat: Chat = new Chat(`${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/attachments_chat`);
     await chat.open();
     log("open");
 

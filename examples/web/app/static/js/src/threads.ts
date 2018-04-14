@@ -15,7 +15,7 @@ let thread: HTMLTemplateElement = null;
 window.addEventListener("DOMContentLoaded", loaded);
 
 async function loaded(): Promise<void> {
-    chat = new Chat(`ws://${window.location.host}/threads_chat`);
+    chat = new Chat(`${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/threads_chat`);
     await chat.open();
     log("open");
 
