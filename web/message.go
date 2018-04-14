@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"net/http"
 )
 
 // The types here need to have 1:1 correspondence with message.ts
@@ -19,17 +18,20 @@ const (
 	UpdateItemType  ItemType = "update"
 )
 
+// Item defines common elements for messages and threads
 type Item interface {
 	ItemID() ItemID
 	ThreadItemID() ItemID
 	ItemType() ItemType
 }
 
+// Cursor objects point to the previous and next item for both messages and threads
 type Cursor struct {
 	Type ItemType `json:"type"`
 	ID   ItemID   `json:"id"`
 }
 
+// ItemSource field lets a client know if a message is a bot message or a user message
 type ItemSource string
 
 const (
@@ -37,6 +39,7 @@ const (
 	UserItemSource ItemSource = "user"
 )
 
+// Message defines the contents of a single message sent by the bot
 type Message struct {
 	Attachments []Attachment `json:"attachments"`
 	Source      ItemSource   `json:"source"`
@@ -73,24 +76,29 @@ func (msg *Message) clone() *Message {
 	return ans
 }
 
+// ItemID gets the ID of the message
 func (msg *Message) ItemID() ItemID {
 	return msg.ID
 }
 
+// ThreadItemID gets the thread ID of the message
 func (msg *Message) ThreadItemID() ItemID {
 	return msg.ThreadID
 }
 
+// ItemType gets the type for the message i.e. MessageItemType
 func (msg *Message) ItemType() ItemType {
 	return MessageItemType
 }
 
 var _ Item = &Message{}
 
+// TextMessage is a shorthand function that creates a message from the passed text
 func TextMessage(text string) *Message {
 	return &Message{Text: text}
 }
 
+// Thread defines a single messaging thread, which contains messages in itself
 type Thread struct {
 	Type     ItemType `json:"type"`
 	ThreadID ItemID   `json:"threadId"`
@@ -103,20 +111,25 @@ func newThread(src *Message) *Thread {
 	return &Thread{ThreadID: src.ThreadID, ID: src.ID, Type: ThreadItemType}
 }
 
+// ItemID returns the id of the thread
 func (t *Thread) ItemID() ItemID {
 	return t.ID
 }
 
+// ThreadItemID returns the id of the parent thread for this thread
 func (t *Thread) ThreadItemID() ItemID {
 	return t.ThreadID
 }
 
+// ItemType returns ThreadItemType for a thread
 func (t *Thread) ItemType() ItemType {
 	return ThreadItemType
 }
 
 var _ Item = &Thread{}
 
+// UnmarshalJSONItem unmarshals a JSON payload into an item depending on whether the item
+// is a message or a thread
 func UnmarshalJSONItem(js []byte) (Item, error) {
 	s := &struct {
 		Type ItemType `json:"type"`
@@ -145,6 +158,7 @@ func UnmarshalJSONItem(js []byte) (Item, error) {
 	return nil, ErrInvalidItem
 }
 
+// AttachmentType defines a string identifying the type of an message attachment
 type AttachmentType string
 
 const (
@@ -155,6 +169,7 @@ const (
 	FileDownloadType                = "file_download"
 )
 
+// Attachment defines the interface for all message attachments
 type Attachment interface {
 	Type() AttachmentType
 }
@@ -169,24 +184,28 @@ type attachment struct {
 	Long           float64        `json:"long,omitempty"`
 }
 
+// Type gets the type of the attachmnet
 func (a *attachment) Type() AttachmentType {
 	return ImageType
 }
 
 var _ Attachment = &attachment{}
 
+// WithTitle is a shorthand that can add a title to any message attachment
 func WithTitle(title string) func(Attachment) {
 	return func(a Attachment) {
 		a.(*attachment).Title = title
 	}
 }
 
+// WithText is a shorthand that can add text to any message attachment
 func WithText(text string) func(Attachment) {
 	return func(a Attachment) {
 		a.(*attachment).Text = text
 	}
 }
 
+// Image defines a function to create an image attachment
 func Image(url, alt string, options ...func(Attachment)) Attachment {
 	ans := &attachment{
 		AttachmentType: ImageType,
@@ -201,6 +220,7 @@ func Image(url, alt string, options ...func(Attachment)) Attachment {
 	return ans
 }
 
+// Audio defines a function to create an audio attachment
 func Audio(url string, options ...func(Attachment)) Attachment {
 	ans := &attachment{
 		AttachmentType: AudioType,
@@ -214,6 +234,7 @@ func Audio(url string, options ...func(Attachment)) Attachment {
 	return ans
 }
 
+// Video defines a function to create a video attachment
 func Video(url string, options ...func(Attachment)) Attachment {
 	ans := &attachment{
 		AttachmentType: VideoType,
@@ -227,6 +248,7 @@ func Video(url string, options ...func(Attachment)) Attachment {
 	return ans
 }
 
+// Location defines a function to create a location attachment
 func Location(lat, long float64, options ...func(Attachment)) Attachment {
 	ans := &attachment{
 		AttachmentType: LocationType,
@@ -241,6 +263,7 @@ func Location(lat, long float64, options ...func(Attachment)) Attachment {
 	return ans
 }
 
+// FileDownload defines a function to create a download attachment
 func FileDownload(url string, options ...func(Attachment)) Attachment {
 	ans := &attachment{
 		AttachmentType: FileDownloadType,
@@ -254,26 +277,25 @@ func FileDownload(url string, options ...func(Attachment)) Attachment {
 	return ans
 }
 
-// ffjson: skip
-type BotPair struct {
-	*Bot
-	*http.Request
-}
-
+// MessagePair is the payload sent for DirectMessage Event.
+//
 // ffjson: skip
 type MessagePair struct {
 	*Message
 	*Bot
 }
 
+// Reply uses the pair's bot to reply with the passed message
 func (mp *MessagePair) Reply(msg *Message) {
 	mp.Bot.Reply(mp.Message, msg)
 }
 
+// ReplyInThread uses the pair's bot to reply in a new thread
 func (mp *MessagePair) ReplyInThread(msg *Message) {
 	mp.Bot.ReplyInThread(mp.Message, msg)
 }
 
+// Update uses the pair's bot to update an existing message.
 func (mp *MessagePair) Update() {
 	mp.Bot.Update(mp.Message)
 }

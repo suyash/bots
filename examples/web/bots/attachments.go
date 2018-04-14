@@ -35,7 +35,7 @@ func (b *AttachmentBots) handleBots() {
 }
 
 func (b *AttachmentBots) handleMessages() {
-	for msg := range b.c.DirectMessages() {
+	for msg := range b.c.Messages() {
 		log.Println("attachments: Got", msg.Message)
 
 		switch msg.Text {

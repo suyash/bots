@@ -42,7 +42,7 @@ func (b *EchoBots) handleBots() {
 }
 
 func (b *EchoBots) handleMessages() {
-	for msg := range b.c.DirectMessages() {
+	for msg := range b.c.Messages() {
 		log.Println("echo: Got", msg.Message)
 		msg.Reply(msg.Message)
 	}

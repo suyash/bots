@@ -1,4 +1,10 @@
-// Package web implements custom websocket bots
+// Package web implements custom websocket bots.
+//
+// You start by creating a `Controller`, and calling `DirectMessages` on that returns
+// a receive only channel, that'll give you incoming messages.
+//
+// Calling `ConnectionHandler` returns an http.Handler that can be set as the handler
+// for any endpoint that should accept websocket connections.
 package web // import "suy.io/bots/web"
 
 import "github.com/pkg/errors"

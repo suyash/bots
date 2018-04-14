@@ -36,7 +36,7 @@ func (b *ThreadBots) handleBots() {
 }
 
 func (b *ThreadBots) handleMessages() {
-	for msg := range b.c.DirectMessages() {
+	for msg := range b.c.Messages() {
 		log.Println("threads: Got", msg.Message)
 
 		if strings.Index(msg.Text, "thread") != -1 {

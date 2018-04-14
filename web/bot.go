@@ -10,7 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ffjson: skip
+// Bot is essentially managing a single WebSocket connection for a controller.
+// It can also start conversations registered with a Controller.
 type Bot struct {
 	id   BotID
 	conn *websocket.Conn
@@ -30,6 +31,7 @@ type Bot struct {
 	errHandler ErrorHandler
 }
 
+// newBot creates a new Bot
 func newBot(id BotID, conn *websocket.Conn, sanitizer *bluemonday.Policy, incomingMessages chan *MessagePair, is ItemStore, conversations ConversationRegistry, convs ConversationStore, errhandler ErrorHandler) *Bot {
 	bot := &Bot{
 		id:   id,
@@ -51,8 +53,11 @@ func newBot(id BotID, conn *websocket.Conn, sanitizer *bluemonday.Policy, incomi
 	return bot
 }
 
+// ID returns the current bot's ID
 func (bot *Bot) ID() BotID { return bot.id }
 
+// read starts a read loop over the WebSocket connection that stops if and only if
+// the connection itself closes.
 func (bot *Bot) read() {
 	defer bot.remover.Do(bot.remove)
 
@@ -75,6 +80,7 @@ func (bot *Bot) read() {
 	}
 }
 
+// handleMessage handles new messages from clients
 func (bot *Bot) handleMessage(msg *Message) {
 	msg.Text = bot.sanitizer.Sanitize(msg.Text)
 
@@ -93,6 +99,8 @@ func (bot *Bot) handleMessage(msg *Message) {
 	}
 }
 
+// write implements a write loop that writes whenever something is available in the
+// outgoingMessages channel.
 func (bot *Bot) write() {
 	defer bot.remover.Do(bot.remove)
 
@@ -109,10 +117,13 @@ func (bot *Bot) write() {
 	}
 }
 
+// send directly adds a new message to the outgoingChannel
 func (bot *Bot) send(i Item) {
 	bot.outgoingMessages <- i
 }
 
+// Send adds an item to be sent without setting ID or cursors. This is typically
+// used to send old messages from history that already have ID and cursors set, or cached items.
 func (bot *Bot) Send(item Item) error {
 	switch i := item.(type) {
 	case *Message:
@@ -142,6 +153,7 @@ func (bot *Bot) Send(item Item) error {
 	return nil
 }
 
+// say sends an item after adding it to the Bot's ItemStore
 func (bot *Bot) say(i Item) {
 	if err := bot.is.Add(i); err != nil {
 		bot.errHandler(errors.Wrap(err, "Could Not Add"))
@@ -150,6 +162,7 @@ func (bot *Bot) say(i Item) {
 	bot.send(i)
 }
 
+// Say directly sends a message to the client.
 func (bot *Bot) Say(msg *Message) {
 	msg.Source = BotItemSource
 	msg.Type = MessageItemType
@@ -157,6 +170,8 @@ func (bot *Bot) Say(msg *Message) {
 	go bot.say(msg)
 }
 
+// Reply replies to a client message, the outgoing message has the ID of the message being
+// replied to set.
 func (bot *Bot) Reply(original, reply *Message) {
 	reply.Prev, reply.Next, reply.Source, reply.Type = nil, nil, BotItemSource, MessageItemType
 	reply.ReplyID = original.ID
@@ -169,6 +184,8 @@ func (bot *Bot) Reply(original, reply *Message) {
 	go bot.say(reply)
 }
 
+// ReplyInThread replies to a client message in the same thread or creates a new thread, if the
+// original message wasn't in a thread.
 func (bot *Bot) ReplyInThread(original, reply *Message) {
 	reply.Prev, reply.Next, reply.Source, reply.Type = nil, nil, BotItemSource, MessageItemType
 	reply.ReplyID = original.ID
@@ -191,11 +208,13 @@ func (bot *Bot) ReplyInThread(original, reply *Message) {
 	}
 }
 
+// Update updates an existing message already sent to the client.
 func (bot *Bot) Update(msg *Message) {
 	msg.Prev, msg.Next, msg.Source, msg.Type = nil, nil, BotItemSource, UpdateItemType
 	go bot.say(msg)
 }
 
+// StartConversation starts a conversation with the given name with the client.
 func (bot *Bot) StartConversation(name string) error {
 	c, ok := bot.conversations[name]
 	if !ok {

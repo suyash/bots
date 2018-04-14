@@ -178,10 +178,10 @@ There are 3 main storage interfaces,
 
 ### Issues
 
-- [x] HTTP + WebSocket
-- [ ] HTTP + SSE
 - [ ] support for sending more than text from client
 - [ ] shell client.
+- [ ] MemoryItemStore can be made O(nlogn).
+- [ ] HTTP + SSE?
 
 ## Slack
 

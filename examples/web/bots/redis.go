@@ -84,7 +84,7 @@ func (b *RedisBots) sendHistory(bot *web.Bot, n int64) {
 }
 
 func (b *RedisBots) handleMessages() {
-	for msg := range b.c.DirectMessages() {
+	for msg := range b.c.Messages() {
 		log.Println("redis: Got", msg.Message)
 		msg.Reply(msg.Message)
 	}

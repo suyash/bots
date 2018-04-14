@@ -116,7 +116,7 @@ func (b *ConversationBots) handleBots() {
 }
 
 func (b *ConversationBots) handleMessages() {
-	for msg := range b.c.DirectMessages() {
+	for msg := range b.c.Messages() {
 		log.Println("conversation: Got", msg.Message)
 		msg.Reply(msg.Message)
 	}

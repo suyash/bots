@@ -116,7 +116,7 @@ func TestNewMemoryItemStore(t *testing.T) {
 		name string
 		want *MemoryItemStore
 	}{
-		{"", &MemoryItemStore{messages: make(map[ItemID]*ItemSet)}},
+		{"", &MemoryItemStore{messages: make(map[ItemID]*itemSet)}},
 	}
 
 	for _, tt := range tests {
@@ -309,14 +309,14 @@ func TestMemoryItemStore_All(t *testing.T) {
 func TestNewItemSet(t *testing.T) {
 	tests := []struct {
 		name string
-		want *ItemSet
+		want *itemSet
 	}{
-		{"", &ItemSet{nil, make(map[ItemID]Item)}},
+		{"", &itemSet{nil, make(map[ItemID]Item)}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewItemSet(); !reflect.DeepEqual(got, tt.want) {
+			if got := newItemSet(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewItemSet() = %v, want %v", got, tt.want)
 			}
 		})
@@ -328,11 +328,11 @@ func TestItemSet_Add(t *testing.T) {
 		item Item
 	}
 
-	s := NewItemSet()
+	s := newItemSet()
 
 	tests := []struct {
 		name string
-		set  *ItemSet
+		set  *itemSet
 		args args
 	}{
 		{"", s, args{&Message{ID: 0}}},
@@ -354,14 +354,14 @@ func TestItemSet_Get(t *testing.T) {
 		id ItemID
 	}
 
-	s, m1, t1, m2 := NewItemSet(), &Message{ID: 1}, &Thread{ID: 2}, &Message{ID: 3}
+	s, m1, t1, m2 := newItemSet(), &Message{ID: 1}, &Thread{ID: 2}, &Message{ID: 3}
 	s.Add(m1)
 	s.Add(t1)
 	s.Add(m2)
 
 	tests := []struct {
 		name    string
-		set     *ItemSet
+		set     *itemSet
 		args    args
 		want    Item
 		wantErr bool
@@ -390,12 +390,12 @@ func TestItemSet_Set(t *testing.T) {
 		i Item
 	}
 
-	s := NewItemSet()
+	s := newItemSet()
 	s.Add(&Message{Text: "a", ID: 1})
 
 	tests := []struct {
 		name    string
-		set     *ItemSet
+		set     *itemSet
 		args    args
 		want    Item
 		wantErr bool
@@ -418,13 +418,13 @@ func TestItemSet_Set(t *testing.T) {
 }
 
 func TestItemSet_Len(t *testing.T) {
-	s := NewItemSet()
+	s := newItemSet()
 	s.Add(TextMessage("a"))
 	s.Add(&Thread{ID: 2})
 
 	tests := []struct {
 		name string
-		set  *ItemSet
+		set  *itemSet
 		want int
 	}{
 		{"", s, 2},

@@ -22,14 +22,14 @@ func TestNewController(t *testing.T) {
 		wantErr bool
 	}{
 		{"", args{}, &Controller{
-			botAdded:       nil,
-			sanitizer:      nil,
-			cs:             nil,
-			conversations:  nil,
-			convs:          nil,
-			directMessages: nil,
-			idCreator:      nil,
-			errHandler:     nil,
+			botAdded:      nil,
+			sanitizer:     nil,
+			cs:            nil,
+			conversations: nil,
+			convs:         nil,
+			messages:      nil,
+			idCreator:     nil,
+			errHandler:    nil,
 		}, false},
 	}
 
@@ -41,7 +41,7 @@ func TestNewController(t *testing.T) {
 			got.cs = nil
 			got.conversations = nil
 			got.convs = nil
-			got.directMessages = nil
+			got.messages = nil
 			got.idCreator = nil
 			got.errHandler = nil
 
