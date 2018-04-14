@@ -6,6 +6,10 @@ A little library to write chatbots in go.
 
 ## web
 
+```
+go get suy.io/bots/web
+```
+
 > more examples in [examples/web/bots](examples/web/bots). Small Deployment example in [examples/web/app](examples/web/app). Also deployed online on https://app-yydcvqhqze.now.sh/.
 
 ```go
@@ -184,6 +188,10 @@ There are 3 main storage interfaces,
 - [ ] HTTP + SSE?
 
 ## Slack
+
+```
+go get suy.io/bots/slack
+```
 
 > more examples in [examples/slack](examples/slack)
 
