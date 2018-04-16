@@ -37,7 +37,7 @@ async function loaded(): Promise<void> {
     for await (const m of chat.messages()) {
         const msg: Message = m;
         log("received", msg);
-        msg.text = msg.text.replace("\n", "\r\n");
+        msg.text = msg.text.replace(new RegExp("\n", "g"), "<br>");
 
         let node: DocumentFragment = newBotMessage(msg);
         if (msg.source === "user") {
@@ -61,13 +61,13 @@ async function loaded(): Promise<void> {
 }
 
 function newUserMessage(msg: Message): DocumentFragment {
-    userMessage.content.querySelector("section").textContent = msg.text;
+    userMessage.content.querySelector("section").innerHTML = msg.text;
     userMessage.content.querySelector(".message").setAttribute("data-ts", msg.id.toString());
     return document.importNode(userMessage.content, true);
 }
 
 function newBotMessage(msg: Message): DocumentFragment {
-    botMessage.content.querySelector("section").textContent = msg.text;
+    botMessage.content.querySelector("section").innerHTML = msg.text;
     botMessage.content.querySelector(".message").setAttribute("data-ts", msg.id.toString());
     return document.importNode(botMessage.content, true);
 }

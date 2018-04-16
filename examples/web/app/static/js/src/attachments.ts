@@ -58,7 +58,7 @@ async function loaded(): Promise<void> {
         const msg: Message = m;
 
         log("received", msg);
-        msg.text = msg.text.replace("\n", "\r\n");
+        msg.text = msg.text.replace(new RegExp("\n", "g"), "<br>");
 
         let node: DocumentFragment = newBotMessage(msg);
         if (msg.source === "user") {
@@ -82,7 +82,7 @@ async function loaded(): Promise<void> {
 }
 
 function newUserMessage(msg: Message): DocumentFragment {
-    userMessage.content.querySelector("section").textContent = msg.text;
+    userMessage.content.querySelector("section").innerHTML = msg.text;
     userMessage.content.querySelector(".message").setAttribute("data-ts", msg.id.toString());
     return document.importNode(userMessage.content, true);
 }
@@ -90,7 +90,7 @@ function newUserMessage(msg: Message): DocumentFragment {
 function newBotMessage(msg: Message): DocumentFragment {
     if (msg.text) {
         botMessage.content.querySelector(".text").classList.remove("hidden");
-        botMessage.content.querySelector(".text").textContent = msg.text;
+        botMessage.content.querySelector(".text").innerHTML = msg.text;
     } else {
         botMessage.content.querySelector(".text").classList.add("hidden");
     }
