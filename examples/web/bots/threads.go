@@ -31,11 +31,9 @@ func NewThreadBots(t *template.Template, pc PageContext) (*ThreadBots, error) {
 func (b *ThreadBots) handleBots() {
 	for b := range b.c.BotAdded() {
 		log.Println("threads: New Bot Added")
-		b.Say(&web.Message{Text: `
-Online.
+		b.Say(&web.Message{Text: `Online.
 
-This is a threads example. Typing "thread" as a word responds and starts a new conversation in a separate thread.
-`})
+This is a threads example. Typing "thread" as a word responds and starts a new conversation in a separate thread.`})
 	}
 }
 

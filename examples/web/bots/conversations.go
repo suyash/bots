@@ -114,8 +114,7 @@ func (b *ConversationBots) handleBots() {
 		b.Say(&web.Message{Text: `Online.
 
 This is a conversation example, with the source at https://github.com/suyash/bots/blob/master/examples/web/bots/conversations.go.
-Essentially typing anything starts a conversation, which ends with a password being generated.
-`})
+Essentially typing anything starts a conversation, which ends with a password being generated.`})
 	}
 }
 

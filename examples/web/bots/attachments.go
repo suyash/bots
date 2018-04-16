@@ -40,8 +40,7 @@ Type "image" to get a message with an image attachment.
 Type "video" to get a message with a video attachment.
 Type "audio" to get a message with an audio attachment.
 Type "location" to get a message with a location attachment.
-Type "download" to get a message with a file download attachment.
-`})
+Type "download" to get a message with a file download attachment.`})
 	}
 }
 

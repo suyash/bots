@@ -58,7 +58,7 @@ async function loaded(): Promise<void> {
         const msg: Message = m;
 
         log("received", msg);
-        msg.text = msg.text.replace("\n", "<br>");
+        msg.text = msg.text.replace("\n", "\r\n");
 
         let node: DocumentFragment = newBotMessage(msg);
         if (msg.source === "user") {
