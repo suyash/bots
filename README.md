@@ -10,7 +10,7 @@ A little library to write chatbots in go.
 go get suy.io/bots/web
 ```
 
-> more examples in [examples/web/bots](examples/web/bots). Small Deployment example in [examples/web/app](examples/web/app). Also deployed online on https://app-yydcvqhqze.now.sh/.
+> more examples in [examples/web/bots](examples/web/bots). Small Deployment example in [examples/web/app](examples/web/app). Also deployed online on https://app-ruhxhowvkv.now.sh.
 
 ```go
 package main
