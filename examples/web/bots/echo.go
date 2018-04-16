@@ -37,7 +37,9 @@ func NewEchoBots(t *template.Template, pc PageContext) (*EchoBots, error) {
 func (b *EchoBots) handleBots() {
 	for b := range b.c.BotAdded() {
 		log.Println("echo: New Bot Added")
-		b.Say(&web.Message{Text: "Online"})
+		b.Say(&web.Message{Text: `Online
+
+This simply echoes everything that it is sent.`})
 	}
 }
 

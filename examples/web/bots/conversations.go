@@ -111,7 +111,11 @@ func NewConversationBots(t *template.Template, pc PageContext) (*ConversationBot
 func (b *ConversationBots) handleBots() {
 	for b := range b.c.BotAdded() {
 		log.Println("conversation: New Bot Added")
-		b.Say(&web.Message{Text: "Online"})
+		b.Say(&web.Message{Text: `Online.
+
+This is a conversation example, with the source at https://github.com/suyash/bots/blob/master/examples/web/bots/conversations.go.
+Essentially typing anything starts a conversation, which ends with a password being generated.			
+`})
 	}
 }
 

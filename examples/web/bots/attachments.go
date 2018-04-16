@@ -30,7 +30,18 @@ func NewAttachmentBots(t *template.Template, pc PageContext) (*AttachmentBots, e
 func (b *AttachmentBots) handleBots() {
 	for b := range b.c.BotAdded() {
 		log.Println("threads: New Bot Added")
-		b.Say(&web.Message{Text: "Online"})
+		b.Say(&web.Message{Text: `Online.
+
+This is an example of receiving attachments in messages.
+
+Source: https://github.com/suyash/bots/blob/master/examples/web/bots/attachments.go
+
+Type "image" to get a message with an image attachment.
+Type "video" to get a message with a video attachment.
+Type "audio" to get a message with an audio attachment.
+Type "location" to get a message with a location attachment.
+Type "download" to get a message with a file download attachment.
+`})
 	}
 }
 
