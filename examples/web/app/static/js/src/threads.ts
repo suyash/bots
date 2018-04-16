@@ -39,6 +39,7 @@ async function loaded(): Promise<void> {
     for await (const m of chat.messages()) {
         const msg: Message = m;
         log("received", msg);
+        msg.text = msg.text.replace("\n", "<br>");
 
         let msgContainer: HTMLDivElement = container;
         if (msg.threadId) {
